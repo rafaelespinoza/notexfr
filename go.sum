@@ -1,0 +1,10 @@
+github.com/apache/thrift v0.13.0 h1:5hryIiq9gtn+MiLVn0wP37kb/uTeRZgN08WoCsAhIhI=
+github.com/apache/thrift v0.13.0/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=
+github.com/dreampuf/evernote-sdk-golang v0.0.0-20200205091351-d2ad936dfa1c h1:RynrQBCQhzkQrayvSO7tZiPeZU//GKaTGeABuKOmNhc=
+github.com/dreampuf/evernote-sdk-golang v0.0.0-20200205091351-d2ad936dfa1c/go.mod h1:XFPH2HLDWtd3uS5j4O60nCLitVBOO0JRg15rTN7yOWw=
+github.com/joho/godotenv v1.3.0 h1:Zjp+RcGpHhGlrMbJzXTrZZPrWj+1vfm90La1wgB6Bhc=
+github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
+github.com/macrat/go-enex v0.0.0-20190325124011-11ac7b8c8c4c h1:45uPI/L86twHVeIQ+7Jn7UOrFxDHD5jL+OhKnjx62RU=
+github.com/macrat/go-enex v0.0.0-20190325124011-11ac7b8c8c4c/go.mod h1:Oj1SZ8j8mMz6D1uOx+/OzI31g2g2aAdRSFLR8JAek3Y=
+github.com/mrjones/oauth v0.0.0-20180629183705-f4e24b6d100c h1:3wkDRdxK92dF+c1ke2dtj7ZzemFWBHB9plnJOtlwdFA=
+github.com/mrjones/oauth v0.0.0-20180629183705-f4e24b6d100c/go.mod h1:skjdDftzkFALcuGzYSklqYd8gvat6F1gZJ4YPVbkZpM=
