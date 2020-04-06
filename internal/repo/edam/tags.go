@@ -6,8 +6,8 @@ import (
 	"io"
 
 	"github.com/dreampuf/evernote-sdk-golang/edam"
-	"github.com/rafaelespinoza/snbackfill/lib"
-	"github.com/rafaelespinoza/snbackfill/lib/entity"
+	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
 // Tags handles input/output for tags from the Evernote EDAM API.

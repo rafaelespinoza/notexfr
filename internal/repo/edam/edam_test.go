@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/lib"
-	"github.com/rafaelespinoza/snbackfill/lib/entity"
-	"github.com/rafaelespinoza/snbackfill/lib/repo/edam"
+	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
+	"github.com/rafaelespinoza/snbackfill/internal/repo/edam"
 )
 
 const (

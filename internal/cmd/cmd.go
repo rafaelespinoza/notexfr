@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/rafaelespinoza/snbackfill/lib/interactor"
-	"github.com/rafaelespinoza/snbackfill/lib/repo/enex"
+	"github.com/rafaelespinoza/snbackfill/internal/interactor"
+	"github.com/rafaelespinoza/snbackfill/internal/repo/enex"
 )
 
 // An arguments captures inputs, options for the main command and subcommands.

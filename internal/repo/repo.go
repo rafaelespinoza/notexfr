@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/rafaelespinoza/snbackfill/lib"
-	"github.com/rafaelespinoza/snbackfill/lib/entity"
+	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
 // Error should wrap the error from a third party library.

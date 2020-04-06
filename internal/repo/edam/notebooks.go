@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/rafaelespinoza/snbackfill/lib"
-	"github.com/rafaelespinoza/snbackfill/lib/entity"
+	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
 // Notebooks handles input/output for notebooks from the Evernote EDAM API.

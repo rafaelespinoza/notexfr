@@ -3,8 +3,8 @@ package enex_test
 import (
 	"testing"
 
-	"github.com/rafaelespinoza/snbackfill/lib"
-	"github.com/rafaelespinoza/snbackfill/lib/repo/enex"
+	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/repo/enex"
 )
 
 func TestInterfaceImplementations(t *testing.T) {

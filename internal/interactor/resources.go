@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/lib"
-	"github.com/rafaelespinoza/snbackfill/lib/repo"
-	"github.com/rafaelespinoza/snbackfill/lib/repo/edam"
-	"github.com/rafaelespinoza/snbackfill/lib/repo/enex"
+	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/repo"
+	"github.com/rafaelespinoza/snbackfill/internal/repo/edam"
+	"github.com/rafaelespinoza/snbackfill/internal/repo/enex"
 )
 
 // FetchWriteOptions is a set of named arguments for fetching remote resources

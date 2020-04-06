@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/lib"
-	"github.com/rafaelespinoza/snbackfill/lib/repo/sn"
+	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/repo/sn"
 )
 
 const (

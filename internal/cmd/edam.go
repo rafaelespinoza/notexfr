@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/lib/interactor"
-	"github.com/rafaelespinoza/snbackfill/lib/repo/edam"
+	"github.com/rafaelespinoza/snbackfill/internal/interactor"
+	"github.com/rafaelespinoza/snbackfill/internal/repo/edam"
 )
 
 var _Edam = func(cmdName string) *delegator {

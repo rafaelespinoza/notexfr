@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/lib"
-	"github.com/rafaelespinoza/snbackfill/lib/entity"
+	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
 // ReadConversionFile takes the output file of a conversion performed at:

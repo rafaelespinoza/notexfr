@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/lib/interactor"
-	"github.com/rafaelespinoza/snbackfill/lib/repo/enex"
+	"github.com/rafaelespinoza/snbackfill/internal/interactor"
+	"github.com/rafaelespinoza/snbackfill/internal/repo/enex"
 )
 
 var _Enex = func(cmdName string) *delegator {

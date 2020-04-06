@@ -3,8 +3,8 @@ package entity_test
 import (
 	"testing"
 
-	"github.com/rafaelespinoza/snbackfill/lib"
-	"github.com/rafaelespinoza/snbackfill/lib/entity"
+	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
 func TestInterfaceImplementations(t *testing.T) {
