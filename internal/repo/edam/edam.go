@@ -12,7 +12,7 @@ import (
 	en "github.com/dreampuf/evernote-sdk-golang/client"
 	"github.com/dreampuf/evernote-sdk-golang/edam"
 	"github.com/joho/godotenv"
-	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 	"github.com/rafaelespinoza/snbackfill/internal/repo"
 )
 
@@ -153,7 +153,7 @@ func makeTimestamp(in edam.Timestamp) time.Time {
 	return time.Unix(int64(in)/1000, 0).UTC()
 }
 
-func fmtTime(t time.Time) string { return t.Format(lib.Timeformat) }
+func fmtTime(t time.Time) string { return t.Format(entity.Timeformat) }
 
 // makeError does some error wrapping for the EDAM API. See for details:
 // - https://dev.evernote.com/doc/articles/error_handling.php

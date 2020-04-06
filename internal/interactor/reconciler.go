@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 	"github.com/rafaelespinoza/snbackfill/internal/repo"
 	"github.com/rafaelespinoza/snbackfill/internal/repo/edam"
 	"github.com/rafaelespinoza/snbackfill/internal/repo/sn"
@@ -25,7 +25,7 @@ type BackfillOpts struct {
 	Verbose               bool
 }
 
-func BackfillSN(ctx context.Context, opts *BackfillOpts) (out []lib.LinkID, err error) {
+func BackfillSN(ctx context.Context, opts *BackfillOpts) (out []entity.LinkID, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -38,11 +38,11 @@ func BackfillSN(ctx context.Context, opts *BackfillOpts) (out []lib.LinkID, err 
 		return
 	}
 	const numNoteLinks = 3
-	enNoteDegrees := make([]map[string][]lib.LinkID, numNoteLinks)
+	enNoteDegrees := make([]map[string][]entity.LinkID, numNoteLinks)
 	for i := 0; i < numNoteLinks; i++ {
-		enNoteDegrees[i] = make(map[string][]lib.LinkID)
+		enNoteDegrees[i] = make(map[string][]entity.LinkID)
 	}
-	err = evernote.notes.each(func(note lib.LinkID) (ierr error) {
+	err = evernote.notes.each(func(note entity.LinkID) (ierr error) {
 		links := note.LinkValues()
 		if len(links) != numNoteLinks {
 			ierr = fmt.Errorf(
@@ -54,7 +54,7 @@ func BackfillSN(ctx context.Context, opts *BackfillOpts) (out []lib.LinkID, err 
 
 		for i, link := range links {
 			if list, ok := enNoteDegrees[i][link]; !ok {
-				enNoteDegrees[i][link] = []lib.LinkID{note}
+				enNoteDegrees[i][link] = []entity.LinkID{note}
 			} else {
 				enNoteDegrees[i][link] = append(list, note)
 			}
@@ -65,8 +65,8 @@ func BackfillSN(ctx context.Context, opts *BackfillOpts) (out []lib.LinkID, err 
 	if err != nil {
 		return
 	}
-	var notes []lib.LinkID
-	err = standardnotes.notes.each(func(note lib.LinkID) (ierr error) {
+	var notes []entity.LinkID
+	err = standardnotes.notes.each(func(note entity.LinkID) (ierr error) {
 		links := note.LinkValues()
 		if len(links) != numNoteLinks {
 			ierr = fmt.Errorf(
@@ -112,12 +112,12 @@ type serviceItems struct {
 func initEvernoteItems(ctx context.Context, opts *BackfillOpts) (out *serviceItems, err error) {
 	out = &serviceItems{}
 	inputs := []struct {
-		newRepo  func() (lib.RepoLocal, error)
+		newRepo  func() (entity.RepoLocal, error)
 		filename string
 		target   *keyedItems
 	}{
 		{
-			newRepo: func() (out lib.RepoLocal, err error) {
+			newRepo: func() (out entity.RepoLocal, err error) {
 				out, err = edam.NewNotebooksRepo()
 				return
 			},
@@ -125,7 +125,7 @@ func initEvernoteItems(ctx context.Context, opts *BackfillOpts) (out *serviceIte
 			target:   &out.notebooks,
 		},
 		{
-			newRepo: func() (out lib.RepoLocal, err error) {
+			newRepo: func() (out entity.RepoLocal, err error) {
 				out, err = edam.NewNotesRepo(nil)
 				return
 			},
@@ -133,7 +133,7 @@ func initEvernoteItems(ctx context.Context, opts *BackfillOpts) (out *serviceIte
 			target:   &out.notes,
 		},
 		{
-			newRepo: func() (out lib.RepoLocal, err error) {
+			newRepo: func() (out entity.RepoLocal, err error) {
 				out, err = edam.NewTagsRepo()
 				return
 			},
@@ -143,8 +143,8 @@ func initEvernoteItems(ctx context.Context, opts *BackfillOpts) (out *serviceIte
 	}
 
 	var (
-		repository lib.RepoLocal
-		list       []lib.LinkID
+		repository entity.RepoLocal
+		list       []entity.LinkID
 	)
 
 	for _, input := range inputs {
@@ -170,7 +170,7 @@ func initStandardNotesItems(ctx context.Context, opts *BackfillOpts) (out *servi
 		return
 	}
 
-	noteItems, tagItems := make(map[string]lib.LinkID), make(map[string]lib.LinkID)
+	noteItems, tagItems := make(map[string]entity.LinkID), make(map[string]entity.LinkID)
 	for _, item := range notes {
 		noteItems[item.GetID()] = item
 	}
@@ -187,9 +187,9 @@ func initStandardNotesItems(ctx context.Context, opts *BackfillOpts) (out *servi
 
 // keyedItems is a collection resources that is indexed by some unique key,
 // such as an ID, where all items originate from the same service provider.
-type keyedItems map[string]lib.LinkID
+type keyedItems map[string]entity.LinkID
 
-func (m keyedItems) each(cb func(item lib.LinkID) error) (err error) {
+func (m keyedItems) each(cb func(item entity.LinkID) error) (err error) {
 	for key, item := range m {
 		if err = cb(item); err != nil {
 			err = fmt.Errorf("%w; key: %q", err, key)
@@ -201,11 +201,11 @@ func (m keyedItems) each(cb func(item lib.LinkID) error) (err error) {
 
 // MatchTags attempts to reconcile tags in Evernote and StandardNotes by reading
 // metadata in local files and comparing values.
-func MatchTags(ctx context.Context, opts *BackfillOpts) (tags []lib.LinkID, err error) {
+func MatchTags(ctx context.Context, opts *BackfillOpts) (tags []entity.LinkID, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	var repository lib.LocalRemoteRepo
+	var repository entity.LocalRemoteRepo
 	if repository, err = edam.NewTagsRepo(); err != nil {
 		return
 	}
@@ -224,11 +224,11 @@ func MatchTags(ctx context.Context, opts *BackfillOpts) (tags []lib.LinkID, err 
 
 // MatchNotes attempts to reconcile notes in Evernote and StandardNotes by
 // reading metadata in local files and comparing values.
-func MatchNotes(ctx context.Context, opts *BackfillOpts) (notes []lib.LinkID, err error) {
+func MatchNotes(ctx context.Context, opts *BackfillOpts) (notes []entity.LinkID, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	var repository lib.LocalRemoteRepo
+	var repository entity.LocalRemoteRepo
 	if repository, err = edam.NewNotesRepo(nil); err != nil {
 		return
 	}
@@ -252,11 +252,11 @@ func MatchNotes(ctx context.Context, opts *BackfillOpts) (notes []lib.LinkID, er
 // ReconcileNotebooks approximates Notebooks in StandardNotes, which on its own,
 // does not have the concept of Notebooks; instead it uses Tags. This function
 // uses Evernote Notebook data to create StandardNotes Tag data.
-func ReconcileNotebooks(ctx context.Context, opts *BackfillOpts) (notebookTags []lib.LinkID, err error) {
+func ReconcileNotebooks(ctx context.Context, opts *BackfillOpts) (notebookTags []entity.LinkID, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	var repository lib.LocalRemoteRepo
+	var repository entity.LocalRemoteRepo
 	if repository, err = edam.NewNotebooksRepo(); err != nil {
 		return
 	}
@@ -277,7 +277,7 @@ func ReconcileNotebooks(ctx context.Context, opts *BackfillOpts) (notebookTags [
 // of enRepo. The standardnotes resources, snNotes and snTags, will always be a
 // notes and tags respectively. Callers can use a blank identifier if one of
 // the resources isn't needed.
-func (b *BackfillOpts) readParseFiles(ctx context.Context, enRepo lib.RepoLocal, enFilename string) (enOut, snNotes, snTags []lib.LinkID, err error) {
+func (b *BackfillOpts) readParseFiles(ctx context.Context, enRepo entity.RepoLocal, enFilename string) (enOut, snNotes, snTags []entity.LinkID, err error) {
 	enOut, err = readLocalFile(ctx, enRepo, enFilename)
 	if err != nil {
 		return
@@ -288,14 +288,14 @@ func (b *BackfillOpts) readParseFiles(ctx context.Context, enRepo lib.RepoLocal,
 
 // link associates resources among services by bucketing and matching based on
 // previously agreed upon field values.
-func (b *BackfillOpts) link(enResources, snResources []lib.LinkID) (out []lib.LinkID, err error) {
+func (b *BackfillOpts) link(enResources, snResources []entity.LinkID) (out []entity.LinkID, err error) {
 	var (
 		links []string
-		list  []lib.LinkID
+		list  []entity.LinkID
 		ok    bool
 	)
 
-	groupedEN := make(map[string][]lib.LinkID)
+	groupedEN := make(map[string][]entity.LinkID)
 	for i, resource := range enResources {
 		links = resource.LinkValues()
 		if len(links) < 1 {
@@ -303,7 +303,7 @@ func (b *BackfillOpts) link(enResources, snResources []lib.LinkID) (out []lib.Li
 			return
 		}
 		if list, ok = groupedEN[links[0]]; !ok {
-			groupedEN[links[0]] = []lib.LinkID{resource}
+			groupedEN[links[0]] = []entity.LinkID{resource}
 		} else {
 			groupedEN[links[0]] = append(list, resource)
 		}
@@ -335,7 +335,7 @@ func (b *BackfillOpts) link(enResources, snResources []lib.LinkID) (out []lib.Li
 // that there are no Evernote Notebooks in the export data that's used to create
 // the initial StandardNotes import data and that StandardNotes does not have
 // Notebooks.
-func (b *BackfillOpts) makeNotebooks(enNotebooks []lib.LinkID, prefix string, snTags []lib.LinkID) (out []lib.LinkID, err error) {
+func (b *BackfillOpts) makeNotebooks(enNotebooks []entity.LinkID, prefix string, snTags []entity.LinkID) (out []entity.LinkID, err error) {
 	allNotebooks := make(map[string]*edam.Notebook)
 
 	for _, resource := range enNotebooks {
@@ -404,6 +404,6 @@ func (b *BackfillOpts) makeNotebooks(enNotebooks []lib.LinkID, prefix string, sn
 // resource. The EvernoteID field can just be a ServiceID, it does not need to
 // be an entire Evernote resource.
 type FromENToSN struct {
-	lib.LinkID `json:"Item"`
-	EvernoteID lib.Resource
+	entity.LinkID `json:"Item"`
+	EvernoteID    entity.Resource
 }

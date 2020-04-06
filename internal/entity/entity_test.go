@@ -3,7 +3,6 @@ package entity_test
 import (
 	"testing"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
@@ -12,9 +11,9 @@ func TestInterfaceImplementations(t *testing.T) {
 		new(entity.ServiceID),
 	}
 	for i, val := range implementations {
-		if _, ok := val.(lib.Resource); !ok {
+		if _, ok := val.(entity.Resource); !ok {
 			t.Errorf(
-				"test %d; expected value of type %T to implement lib.Resource",
+				"test %d; expected value of type %T to implement entity.Resource",
 				i, val,
 			)
 		}

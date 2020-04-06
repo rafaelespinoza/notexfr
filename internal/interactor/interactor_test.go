@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 	"github.com/rafaelespinoza/snbackfill/internal/interactor"
 	"github.com/rafaelespinoza/snbackfill/internal/repo/sn"
 )
 
 const (
-	_BaseTestOutputDir = "/tmp/snbackfill_test/lib/interactor"
+	_BaseTestOutputDir = "/tmp/snbackfill_test/entity/interactor"
 	_FixturesDir       = "../../internal/fixtures"
 	_StubNotebooksFile = "edam_notebooks.json"
 	_StubNotesFile     = "edam_notes.json"
@@ -36,9 +36,9 @@ func TestInterfaceImplementations(t *testing.T) {
 		}
 		for i, val := range implementations {
 			var ok bool
-			if _, ok = val.(lib.LinkID); !ok {
+			if _, ok = val.(entity.LinkID); !ok {
 				t.Errorf(
-					"test %d; expected value of type %T to implement lib.LinkID",
+					"test %d; expected value of type %T to implement entity.LinkID",
 					i, val,
 				)
 			}
@@ -64,7 +64,7 @@ func TestReconciliation(t *testing.T) {
 
 	t.Run("Tags", func(t *testing.T) {
 		var (
-			actualTags []lib.LinkID
+			actualTags []entity.LinkID
 			err        error
 			conv       *interactor.FromENToSN
 			tag        *sn.Tag
@@ -160,7 +160,7 @@ func TestReconciliation(t *testing.T) {
 
 	t.Run("Notes", func(t *testing.T) {
 		var (
-			actualOutput []lib.LinkID
+			actualOutput []entity.LinkID
 			err          error
 			conv         *interactor.FromENToSN
 			note         *sn.Note
@@ -329,7 +329,7 @@ func TestReconciliation(t *testing.T) {
 
 	t.Run("Notebooks", func(t *testing.T) {
 		var (
-			actualOutput []lib.LinkID
+			actualOutput []entity.LinkID
 			err          error
 			conv         *interactor.FromENToSN
 			tag          *sn.Tag
@@ -444,7 +444,7 @@ func TestReconciliation(t *testing.T) {
 
 	t.Run("BackfillSN", func(t *testing.T) {
 		var (
-			actualOutput []lib.LinkID
+			actualOutput []entity.LinkID
 			err          error
 			conv         *interactor.FromENToSN
 			note         *sn.Note
@@ -673,12 +673,12 @@ func TestReconciliation(t *testing.T) {
 	})
 }
 
-func mustSNTag(link lib.LinkID) *sn.Tag {
+func mustSNTag(link entity.LinkID) *sn.Tag {
 	item := link.(*interactor.FromENToSN)
 	return item.LinkID.(*sn.Tag)
 }
 
-func mustSNNote(link lib.LinkID) *sn.Note {
+func mustSNNote(link entity.LinkID) *sn.Note {
 	item := link.(*interactor.FromENToSN)
 	return item.LinkID.(*sn.Note)
 }

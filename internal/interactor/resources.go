@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 	"github.com/rafaelespinoza/snbackfill/internal/repo"
 	"github.com/rafaelespinoza/snbackfill/internal/repo/edam"
 	"github.com/rafaelespinoza/snbackfill/internal/repo/enex"
@@ -24,7 +24,7 @@ type FetchWriteOptions struct {
 // FetchWriteNotebooks gets Notebooks from your Evernote account and writes the
 // results to a local JSON file.
 func FetchWriteNotebooks(ctx context.Context, opts *FetchWriteOptions) (err error) {
-	var repository lib.LocalRemoteRepo
+	var repository entity.LocalRemoteRepo
 	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 	defer cancel()
 	if repository, err = edam.NewNotebooksRepo(); err != nil {
@@ -37,7 +37,7 @@ func FetchWriteNotebooks(ctx context.Context, opts *FetchWriteOptions) (err erro
 // FetchWriteTags gets Tags from your Evernote account and writes the results
 // to a local JSON file.
 func FetchWriteTags(ctx context.Context, opts *FetchWriteOptions) (err error) {
-	var repository lib.LocalRemoteRepo
+	var repository entity.LocalRemoteRepo
 	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 	defer cancel()
 	if repository, err = edam.NewTagsRepo(); err != nil {
@@ -50,7 +50,7 @@ func FetchWriteTags(ctx context.Context, opts *FetchWriteOptions) (err error) {
 // FetchWriteNotes gets Notes from your Evernote account and writes the results
 // to a local JSON file.
 func FetchWriteNotes(ctx context.Context, opts *FetchWriteOptions) (err error) {
-	var repository lib.LocalRemoteRepo
+	var repository entity.LocalRemoteRepo
 	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 	defer cancel()
 	if repository, err = edam.NewNotesRepo(opts.NotesQueryParams); err != nil {
@@ -62,8 +62,8 @@ func FetchWriteNotes(ctx context.Context, opts *FetchWriteOptions) (err error) {
 
 // WriteENEXToJSON converts an Evernote export file to JSON.
 func WriteENEXToJSON(ctx context.Context, opts *FetchWriteOptions) (err error) {
-	var repository lib.RepoLocal
-	var resources []lib.LinkID
+	var repository entity.RepoLocal
+	var resources []entity.LinkID
 	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 	defer cancel()
 	if repository, err = enex.NewFileRepo(); err != nil {
@@ -76,8 +76,8 @@ func WriteENEXToJSON(ctx context.Context, opts *FetchWriteOptions) (err error) {
 	return
 }
 
-func fetchWriteResource(ctx context.Context, repository lib.LocalRemoteRepo, opts *FetchWriteOptions, name string) (err error) {
-	var resources []lib.LinkID
+func fetchWriteResource(ctx context.Context, repository entity.LocalRemoteRepo, opts *FetchWriteOptions, name string) (err error) {
+	var resources []entity.LinkID
 	if resources, err = fetchResources(ctx, repository, opts, name); err != nil {
 		return
 	}
@@ -85,7 +85,7 @@ func fetchWriteResource(ctx context.Context, repository lib.LocalRemoteRepo, opt
 	return
 }
 
-func fetchResources(ctx context.Context, repository lib.LocalRemoteRepo, opts *FetchWriteOptions, name string) (resources []lib.LinkID, err error) {
+func fetchResources(ctx context.Context, repository entity.LocalRemoteRepo, opts *FetchWriteOptions, name string) (resources []entity.LinkID, err error) {
 	if resources, err = repo.FetchResources(ctx, repository); err != nil {
 		return
 	}
@@ -95,7 +95,7 @@ func fetchResources(ctx context.Context, repository lib.LocalRemoteRepo, opts *F
 	return
 }
 
-func writeResources(resources []lib.LinkID, output string, verbose bool, name string) (err error) {
+func writeResources(resources []entity.LinkID, output string, verbose bool, name string) (err error) {
 	if err = repo.WriteResourcesJSON(resources, output); err != nil {
 		return
 	}
@@ -105,7 +105,7 @@ func writeResources(resources []lib.LinkID, output string, verbose bool, name st
 	return
 }
 
-func readLocalFile(ctx context.Context, repository lib.RepoLocal, filename string) ([]lib.LinkID, error) {
+func readLocalFile(ctx context.Context, repository entity.RepoLocal, filename string) ([]entity.LinkID, error) {
 	return repo.ReadLocalFile(ctx, repository, filename)
 }
 

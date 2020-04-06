@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
 	"github.com/rafaelespinoza/snbackfill/internal/repo/edam"
 )
@@ -27,9 +26,9 @@ func TestInterfaceImplementations(t *testing.T) {
 			new(edam.Tags),
 		}
 		for i, val := range implementations {
-			if _, ok := val.(lib.LocalRemoteRepo); !ok {
+			if _, ok := val.(entity.LocalRemoteRepo); !ok {
 				t.Errorf(
-					"test %d; expected value of type %T to implement lib.LocalRemoteRepo",
+					"test %d; expected value of type %T to implement entity.LocalRemoteRepo",
 					i, val,
 				)
 			}
@@ -44,9 +43,9 @@ func TestInterfaceImplementations(t *testing.T) {
 		}
 		for i, val := range implementations {
 			var ok bool
-			if _, ok = val.(lib.LinkID); !ok {
+			if _, ok = val.(entity.LinkID); !ok {
 				t.Errorf(
-					"test %d; expected value of type %T to implement lib.LinkID",
+					"test %d; expected value of type %T to implement entity.LinkID",
 					i, val,
 				)
 			}
@@ -57,9 +56,9 @@ func TestInterfaceImplementations(t *testing.T) {
 func TestNotebooks(t *testing.T) {
 	t.Run("Read", func(t *testing.T) {
 		var (
-			repo            lib.LocalRemoteRepo
+			repo            entity.LocalRemoteRepo
 			err             error
-			actualResources []lib.LinkID
+			actualResources []entity.LinkID
 			resource        *edam.Notebook
 			ok              bool
 		)
@@ -148,9 +147,9 @@ func TestNotebooks(t *testing.T) {
 func TestNotes(t *testing.T) {
 	t.Run("Read", func(t *testing.T) {
 		var (
-			repo            lib.LocalRemoteRepo
+			repo            entity.LocalRemoteRepo
 			err             error
-			actualResources []lib.LinkID
+			actualResources []entity.LinkID
 			resource        *edam.Note
 			ok              bool
 		)
@@ -406,9 +405,9 @@ func TestNotes(t *testing.T) {
 func TestTags(t *testing.T) {
 	t.Run("Read", func(t *testing.T) {
 		var (
-			repo            lib.LocalRemoteRepo
+			repo            entity.LocalRemoteRepo
 			err             error
-			actualResources []lib.LinkID
+			actualResources []entity.LinkID
 			resource        *edam.Tag
 			ok              bool
 		)
@@ -479,7 +478,7 @@ func TestTags(t *testing.T) {
 	})
 }
 
-func readLocalFile(repository lib.RepoLocal, filename string) (out []lib.LinkID, err error) {
+func readLocalFile(repository entity.RepoLocal, filename string) (out []entity.LinkID, err error) {
 	var file *os.File
 	if file, err = os.Open(filename); err != nil {
 		return

@@ -3,7 +3,7 @@ package enex_test
 import (
 	"testing"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 	"github.com/rafaelespinoza/snbackfill/internal/repo/enex"
 )
 
@@ -13,9 +13,9 @@ func TestInterfaceImplementations(t *testing.T) {
 			new(enex.File),
 		}
 		for i, val := range implementations {
-			if _, ok := val.(lib.RepoLocal); !ok {
+			if _, ok := val.(entity.RepoLocal); !ok {
 				t.Errorf(
-					"test %d; expected value of type %T to implement lib.RepoLocal",
+					"test %d; expected value of type %T to implement entity.RepoLocal",
 					i, val,
 				)
 			}
@@ -27,9 +27,9 @@ func TestInterfaceImplementations(t *testing.T) {
 			new(enex.Note),
 		}
 		for i, val := range implementations {
-			if _, ok := val.(lib.LinkID); !ok {
+			if _, ok := val.(entity.LinkID); !ok {
 				t.Errorf(
-					"test %d; expected value of type %T to implement lib.LinkID",
+					"test %d; expected value of type %T to implement entity.LinkID",
 					i, val,
 				)
 			}

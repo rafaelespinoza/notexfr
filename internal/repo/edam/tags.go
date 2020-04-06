@@ -6,7 +6,6 @@ import (
 	"io"
 
 	"github.com/dreampuf/evernote-sdk-golang/edam"
-	lib "github.com/rafaelespinoza/snbackfill/internal"
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
@@ -14,10 +13,10 @@ import (
 type Tags struct{}
 
 // NewTagsRepo constructs a Tags repository.
-func NewTagsRepo() (lib.LocalRemoteRepo, error) { return &Tags{}, nil }
+func NewTagsRepo() (entity.LocalRemoteRepo, error) { return &Tags{}, nil }
 
 // FetchRemote gets Tags from the Evernote EDAM API.
-func (n *Tags) FetchRemote(ctx context.Context) (out []lib.LinkID, err error) {
+func (n *Tags) FetchRemote(ctx context.Context) (out []entity.LinkID, err error) {
 	var (
 		s    *store
 		tags []*edam.Tag
@@ -32,7 +31,7 @@ func (n *Tags) FetchRemote(ctx context.Context) (out []lib.LinkID, err error) {
 		err = makeError(err)
 		return
 	}
-	out = make([]lib.LinkID, len(tags))
+	out = make([]entity.LinkID, len(tags))
 	for i, tag = range tags {
 		id = string(tag.GetGUID())
 		out[i] = &Tag{
@@ -48,13 +47,13 @@ func (n *Tags) FetchRemote(ctx context.Context) (out []lib.LinkID, err error) {
 }
 
 // ReadLocal reads and parses tags saved in a local JSON file.
-func (n *Tags) ReadLocal(ctx context.Context, r io.Reader) (out []lib.LinkID, err error) {
+func (n *Tags) ReadLocal(ctx context.Context, r io.Reader) (out []entity.LinkID, err error) {
 	decoder := json.NewDecoder(r)
 	var resources []*Tag
 	if err = decoder.Decode(&resources); err != nil {
 		return
 	}
-	out = make([]lib.LinkID, len(resources))
+	out = make([]entity.LinkID, len(resources))
 	for i, res := range resources {
 		res.ServiceID = &entity.ServiceID{Value: res.ID}
 		out[i] = res

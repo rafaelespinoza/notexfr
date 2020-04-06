@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
 
 	"github.com/dreampuf/evernote-sdk-golang/edam"
@@ -18,7 +17,7 @@ type Notes struct {
 }
 
 // NewNotesRepo constructs a Notes repository.
-func NewNotesRepo(rqp *NotesRemoteQueryParams) (lib.LocalRemoteRepo, error) {
+func NewNotesRepo(rqp *NotesRemoteQueryParams) (entity.LocalRemoteRepo, error) {
 	if rqp == nil {
 		rqp = &NotesRemoteQueryParams{TagIDs: make([]string, 0)}
 	}
@@ -29,7 +28,7 @@ func NewNotesRepo(rqp *NotesRemoteQueryParams) (lib.LocalRemoteRepo, error) {
 // perform pagination based on the param argument which should be of the
 // concrete type, NotesQuery. Multiple API calls will be made until there are no
 // more remaining results.
-func (n *Notes) FetchRemote(ctx context.Context) (out []lib.LinkID, err error) {
+func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error) {
 	var (
 		s *store
 	)
@@ -52,7 +51,7 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []lib.LinkID, err error) {
 		IncludeTitle:        &yes,
 		IncludeUpdated:      &yes,
 	}
-	out = make([]lib.LinkID, 0)
+	out = make([]entity.LinkID, 0)
 
 	for !pagination.done {
 		var ierr error
@@ -70,7 +69,7 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []lib.LinkID, err error) {
 		}
 		notesMetadata := notesMetadataList.GetNotes()
 		numResults := len(notesMetadata)
-		subList := make([]lib.LinkID, numResults)
+		subList := make([]entity.LinkID, numResults)
 		ierr = pagination.update(
 			notesMetadataList.GetStartIndex(),
 			int32(numResults),
@@ -80,7 +79,7 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []lib.LinkID, err error) {
 			return
 		}
 
-		var note lib.LinkID
+		var note entity.LinkID
 		for i, noteMeta := range notesMetadata {
 			if note, ierr = newNote(noteMeta); ierr != nil {
 				err = ierr
@@ -155,7 +154,7 @@ func (p *paginator) update(startIndex, totalResults int32) (err error) {
 	return
 }
 
-func newNote(noteMeta *edam.NoteMetadata) (resource lib.LinkID, err error) {
+func newNote(noteMeta *edam.NoteMetadata) (resource entity.LinkID, err error) {
 	// cannot fill the Tags field (name of the tag itself) from here, but it can
 	// be "backfilled" after grabbing the tag data in a separate request.
 	id := string(noteMeta.GetGUID())
@@ -186,13 +185,13 @@ func newNote(noteMeta *edam.NoteMetadata) (resource lib.LinkID, err error) {
 }
 
 // ReadLocal reads and parses notes saved in a local JSON file.
-func (n *Notes) ReadLocal(ctx context.Context, r io.Reader) (out []lib.LinkID, err error) {
+func (n *Notes) ReadLocal(ctx context.Context, r io.Reader) (out []entity.LinkID, err error) {
 	decoder := json.NewDecoder(r)
 	var resources []*Note
 	if err = decoder.Decode(&resources); err != nil {
 		return
 	}
-	out = make([]lib.LinkID, len(resources))
+	out = make([]entity.LinkID, len(resources))
 	for i, res := range resources {
 		res.ServiceID = &entity.ServiceID{Value: res.ID}
 		out[i] = res

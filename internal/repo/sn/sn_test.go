@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 	"github.com/rafaelespinoza/snbackfill/internal/repo/sn"
 )
 
@@ -24,9 +24,9 @@ func TestInterfaceImplementations(t *testing.T) {
 	}
 	for i, val := range implementations {
 		var ok bool
-		if _, ok = val.(lib.LinkID); !ok {
+		if _, ok = val.(entity.LinkID); !ok {
 			t.Errorf(
-				"test %d; expected value of type %T to implement lib.LinkID",
+				"test %d; expected value of type %T to implement entity.LinkID",
 				i, val,
 			)
 		}
@@ -36,8 +36,8 @@ func TestInterfaceImplementations(t *testing.T) {
 func TestReadConversionFile(t *testing.T) {
 	const pathToFile = _FixturesDir + "/" + _StubENtoSNFile
 	var (
-		notes []lib.LinkID
-		tags  []lib.LinkID
+		notes []entity.LinkID
+		tags  []entity.LinkID
 		err   error
 		note  *sn.Note
 		tag   *sn.Tag

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
@@ -13,10 +12,10 @@ import (
 type Notebooks struct{}
 
 // NewNotebooksRepo constructs a Notebooks repository.
-func NewNotebooksRepo() (lib.LocalRemoteRepo, error) { return &Notebooks{}, nil }
+func NewNotebooksRepo() (entity.LocalRemoteRepo, error) { return &Notebooks{}, nil }
 
 // FetchRemote gets Notebooks from the Evernote EDAM API.
-func (n *Notebooks) FetchRemote(ctx context.Context) (out []lib.LinkID, err error) {
+func (n *Notebooks) FetchRemote(ctx context.Context) (out []entity.LinkID, err error) {
 	var s *store
 	var id string
 	if s, err = initStore(ctx); err != nil {
@@ -27,7 +26,7 @@ func (n *Notebooks) FetchRemote(ctx context.Context) (out []lib.LinkID, err erro
 		err = makeError(err)
 		return
 	}
-	out = make([]lib.LinkID, len(notebooks))
+	out = make([]entity.LinkID, len(notebooks))
 	for i, notebook := range notebooks {
 		id = string(notebook.GetGUID())
 		out[i] = &Notebook{
@@ -45,13 +44,13 @@ func (n *Notebooks) FetchRemote(ctx context.Context) (out []lib.LinkID, err erro
 }
 
 // ReadLocal reads and parses notebooks saved in a local JSON file.
-func (n *Notebooks) ReadLocal(ctx context.Context, r io.Reader) (out []lib.LinkID, err error) {
+func (n *Notebooks) ReadLocal(ctx context.Context, r io.Reader) (out []entity.LinkID, err error) {
 	decoder := json.NewDecoder(r)
 	var resources []*Notebook
 	if err = decoder.Decode(&resources); err != nil {
 		return
 	}
-	out = make([]lib.LinkID, len(resources))
+	out = make([]entity.LinkID, len(resources))
 	for i, res := range resources {
 		res.ServiceID = &entity.ServiceID{Value: res.ID}
 		out[i] = res

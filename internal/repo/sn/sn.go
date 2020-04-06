@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
@@ -17,7 +16,7 @@ import (
 // conversion file input is a flat array of items as JSON, where the content
 // type is one of a few enumerable values, such as "Note", "Tag". This function
 // groups items by content type into separate lists.
-func ReadConversionFile(filename string) (notes, tags []lib.LinkID, err error) {
+func ReadConversionFile(filename string) (notes, tags []entity.LinkID, err error) {
 	var (
 		file      *os.File
 		decoder   *json.Decoder
@@ -167,7 +166,7 @@ func (n *Note) AppendTags(ids ...string) (nextLen int) {
 	return
 }
 
-func fmtTime(t time.Time) string { return t.Format(lib.Timeformat) }
+func fmtTime(t time.Time) string { return t.Format(entity.Timeformat) }
 
 // Tag is an item in a conversion file with a content type of Tag.
 type Tag struct {

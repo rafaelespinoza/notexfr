@@ -9,32 +9,30 @@ import (
 	"os"
 	"time"
 
-	lib "github.com/rafaelespinoza/snbackfill/internal"
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
-
 	"github.com/macrat/go-enex"
+	"github.com/rafaelespinoza/snbackfill/internal/entity"
 )
 
 // File implements the local repository interface for enex files.
 type File struct{}
 
 // NewFileRepo constructs a File.
-func NewFileRepo() (lib.RepoLocal, error) { return &File{}, nil }
+func NewFileRepo() (entity.RepoLocal, error) { return &File{}, nil }
 
 const timeformat = "2006-01-02T15:04:05Z"
 
 // ReadLocal reads and parses an enex file.
-func (f *File) ReadLocal(ctx context.Context, r io.Reader) (out []lib.LinkID, err error) {
+func (f *File) ReadLocal(ctx context.Context, r io.Reader) (out []entity.LinkID, err error) {
 	var (
 		parsed enex.EvernoteExportedXML
-		note   lib.LinkID
+		note   entity.LinkID
 	)
 
 	if parsed, err = enex.ParseFromReader(r); err != nil {
 		return
 	}
 
-	resources := make([]lib.LinkID, len(parsed.Notes))
+	resources := make([]entity.LinkID, len(parsed.Notes))
 	for i, enexNote := range parsed.Notes {
 		if note, err = newNoteFromEnex(&enexNote); err != nil {
 			return
@@ -53,13 +51,13 @@ type Note struct {
 
 func (n *Note) LinkValues() []string {
 	return []string{
-		n.CreatedAt.Format(lib.Timeformat),
+		n.CreatedAt.Format(entity.Timeformat),
 		n.Title,
-		n.UpdatedAt.Format(lib.Timeformat),
+		n.UpdatedAt.Format(entity.Timeformat),
 	}
 }
 
-func newNoteFromEnex(enexNote *enex.Note) (resource lib.LinkID, err error) {
+func newNoteFromEnex(enexNote *enex.Note) (resource entity.LinkID, err error) {
 	var createdAt, updatedAt time.Time
 	if createdAt, err = time.Parse(timeformat, enexNote.CreatedAt.String()); err != nil {
 		return
