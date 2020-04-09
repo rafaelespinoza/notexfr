@@ -13,7 +13,6 @@ import (
 
 var _Edam = func(cmdName string) *delegator {
 	cmd := &delegator{description: "handle Evernote data from the EDAM API"}
-	const dotenvFilename = ".env"
 
 	// Define this field before defining the Usage function so the subcommand
 	// descriptions are present in the help message.
@@ -21,20 +20,27 @@ var _Edam = func(cmdName string) *delegator {
 		"make-env": &command{
 			description: "init an env var file unless it already exists",
 			setup: func(a *arguments) *flag.FlagSet {
-				const name = "edam make-env"
+				const name = "make-env"
 				flags := flag.NewFlagSet(name, flag.ExitOnError)
+				flags.StringVar(
+					&a.envfile,
+					"envfile",
+					"",
+					"path to env var file",
+				)
 				flags.Usage = func() {
 					fmt.Printf(`Usage: %s edam %s
 
 	Create an environment variable file to store Evernote sandbox and production
-	credentials. If it's not already there, it will be created at %q
-`,
-						_Bin, name, dotenvFilename)
+	credentials.`,
+						_Bin, name)
+					fmt.Printf("\n\nFlags:\n\n")
+					flags.PrintDefaults()
 				}
 				return flags
 			},
 			run: func(ctx context.Context, a *arguments) error {
-				return interactor.MakeEDAMEnvFile(dotenvFilename)
+				return interactor.MakeEDAMEnvFile(a.envfile)
 			},
 		},
 		"notebooks": &command{
@@ -44,7 +50,7 @@ var _Edam = func(cmdName string) *delegator {
 			},
 			run: func(ctx context.Context, a *arguments) error {
 				return interactor.FetchWriteNotebooks(
-					newEdamContext(ctx, a.production),
+					newEdamContext(ctx, a.envfile, a.production),
 					a.fetchWriteOpts,
 				)
 			},
@@ -78,7 +84,7 @@ var _Edam = func(cmdName string) *delegator {
 			run: func(ctx context.Context, a *arguments) error {
 				a.fetchWriteOpts.NotesQueryParams.Verbose = a.fetchWriteOpts.Verbose
 				return interactor.FetchWriteNotes(
-					newEdamContext(ctx, a.production),
+					newEdamContext(ctx, a.envfile, a.production),
 					a.fetchWriteOpts,
 				)
 			},
@@ -90,7 +96,7 @@ var _Edam = func(cmdName string) *delegator {
 			},
 			run: func(ctx context.Context, a *arguments) error {
 				return interactor.FetchWriteTags(
-					newEdamContext(ctx, a.production),
+					newEdamContext(ctx, a.envfile, a.production),
 					a.fetchWriteOpts,
 				)
 			},
@@ -108,10 +114,14 @@ Description:
 	%s interacts with Evernote.
 	It handles fetching resources from the Evernote API (EDAM) and writes the
 	results to local JSON files. A developer token is required to access your
-	Evernote account. The values should be stored in the file, ".env".
+	Evernote account.
 
 	See the developer guide to get started:
 	%s
+
+	Specify account credentials in a file with the -envfile flag.
+	Use the -production flag to use production credentials, otherwise it will
+	default to using sandbox credentials.
 
 Subcommands:
 
@@ -136,18 +146,20 @@ func setupFetchWriteCommands(a *arguments, name string) *flag.FlagSet {
 	flags.DurationVar(
 		&opts.Timeout,
 		"timeout",
-		time.Duration(15)*time.Second,
+		time.Duration(120)*time.Second,
 		"how long to wait before timing out",
 	)
 	flags.BoolVar(&opts.Verbose, "verbose", false, "output stuff as it happens")
 	flags.BoolVar(&_Args.production, "production", false, "use production evernote account")
+	flags.StringVar(&_Args.envfile, "envfile", "", "path to to env var file")
 	a.fetchWriteOpts = &opts
 	flags.Usage = func() {
 		fmt.Printf(`Usage: %s edam %s
 
 	Fetch %s from your Evernote account and write them to JSON files.
 	Use your sandbox account by default. To use your production account, pass
-	the -production flag.`,
+	the -production flag.
+	Specify account credentials with the -envfile flag.`,
 			_Bin, name, name)
 
 		fmt.Printf("\n\nFlags:\n\n")
@@ -156,11 +168,14 @@ func setupFetchWriteCommands(a *arguments, name string) *flag.FlagSet {
 	return flags
 }
 
-func newEdamContext(parentCtx context.Context, production bool) (ctx context.Context) {
+func newEdamContext(parentCtx context.Context, envFile string, production bool) (ctx context.Context) {
 	var serviceEnvironment edam.EvernoteService
 	if production {
 		serviceEnvironment = edam.EvernoteProductionService
 	}
-	ctx = context.WithValue(parentCtx, edam.EvernoteServiceKey, serviceEnvironment)
+	ctx = context.WithValue(parentCtx, edam.EvernoteServiceKey, edam.CredentialsConfig{
+		EnvFilename: envFile,
+		ServiceEnv:  serviceEnvironment,
+	})
 	return
 }

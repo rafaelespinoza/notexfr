@@ -55,31 +55,44 @@ it's a manual process but they are usually pretty quick.
 Once you have that info, store them in an environment variable file. Create a
 template file and fill it in.
 
+You must specify a path to an environment variable file. _The information in
+there will be equivalent to your username and password_.
+
 ```
-notexfr edam make-env
+notexfr edam make-env --envfile path/to/envfile
+chmod 600 path/to/envfile
 ```
 
 ### Fetch Evernote data, write to local files
 
 By default, everything is fetched using your sandbox account. Use the
 `--production` flag to fetch data from your production Evernote account.
+Remember to specify the path to the environment variable file.
 
-```sh
-notexfr edam notebooks --production --output path/to/en_notebooks.json
-notexfr edam tags --production --output path/to/en_tags.json
+```bash
+notexfr edam notebooks \
+  --production \
+  --output path/to/en_notebooks.json \
+  --envfile path/to/envfile
+
+notexfr edam tags \
+  --production \
+  --output path/to/en_tags.json \
+  --envfile path/to/envfile
 ```
 
-To get notes, you should probably have a longer timeout than the default.
+To get notes, you might consider a longer timeout value than the default.
 Anecdotally, it took about 90 seconds to download about 1550 notes. Your results
-will vary. To be safe, set it on the higher end. Add the `verbose` flag
-for updates.
+will vary. To be safe, set it on the higher end. Add the `verbose` flag for
+updates.
 
 ```sh
 notexfr edam notes \
   --production \
+  --output path/to/en_notes.json \
+  --envfile path/to/envfile \
   --timeout 120s \
-  --verbose \
-  --output path/to/en_notes.json
+  --verbose
 ```
 
 ### Convert or backfill StandardNotes data

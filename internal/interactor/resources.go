@@ -125,10 +125,14 @@ func readLocalFile(ctx context.Context, repository entity.RepoLocal, filename st
 
 // MakeEDAMEnvFile creates a file at filename with environment variables for
 // the Evernote API unless it already exists.
-func MakeEDAMEnvFile(filename string) (err error) {
-	if err = edam.MakeEnvFile(filename); err != nil {
+func MakeEDAMEnvFile(envfile string) (err error) {
+	if envfile == "" {
+		err = fmt.Errorf("envfile is required")
 		return
 	}
-	fmt.Printf("ok, wrote to %q\n", filename)
+	if err = edam.MakeEnvFile(envfile); err != nil {
+		return
+	}
+	fmt.Printf("ok, wrote to %q\n", envfile)
 	return
 }

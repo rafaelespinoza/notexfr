@@ -17,6 +17,7 @@ import (
 type arguments struct {
 	positionalArgs []string
 	production     bool
+	envfile        string
 	fetchWriteOpts *interactor.FetchWriteParams
 	enexExportOpts *enex.FileOpts
 	backfillOpts   *interactor.BackfillParams

@@ -21,7 +21,7 @@ func (n *Notebooks) FetchRemote(ctx context.Context) (out []entity.LinkID, err e
 	if s, err = initStore(ctx); err != nil {
 		return
 	}
-	notebooks, err := s.noteClient.ListNotebooks(ctx, s.noteClient.token)
+	notebooks, err := s.ListNotebooks(ctx, s.token)
 	if err != nil {
 		err = makeError(err)
 		return

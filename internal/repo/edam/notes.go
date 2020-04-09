@@ -61,9 +61,9 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error
 		if n.rqp.Verbose {
 			fmt.Printf("fetching metadata, running total: %d\n", len(out))
 		}
-		notesMetadataList, ierr := s.noteClient.FindNotesMetadata(
+		notesMetadataList, ierr := s.FindNotesMetadata(
 			ctx,
-			s.noteClient.token,
+			s.token,
 			filter,
 			pagination.currOffset,
 			pageSize,
@@ -95,9 +95,9 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error
 			if n.rqp.Verbose && numResultsInRange > 1 && i%(numResultsInRange/2) == 0 {
 				fmt.Printf("\tfetching note content %d/%d\n", len(out)+i, numTotalResults)
 			}
-			result, ierr := s.noteClient.GetNoteWithResultSpec(
+			result, ierr := s.GetNoteWithResultSpec(
 				ctx,
-				s.noteClient.token,
+				s.token,
 				noteID,
 				resultSpec,
 			)

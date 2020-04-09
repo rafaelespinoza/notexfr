@@ -20,8 +20,8 @@ import (
 // with Evernote.
 type EvernoteService uint8
 
-// EvernoteServiceKey is the name of the environment variable that stores the
-// EvernoteService value.
+// EvernoteServiceKey is the name of the context key that stores the EDAM
+// credential configuration values.
 const EvernoteServiceKey = "EVERNOTE_SERVICE"
 
 const (
@@ -37,13 +37,11 @@ func (d EvernoteService) String() string {
 	return [...]string{"SANDBOX", "PRODUCTION"}[d]
 }
 
-type store struct {
-	noteClient *edamNoteStore
-
-	credentials *evernoteCredentials
+// CredentialsConfig says where to find credentials and which to ones to use.
+type CredentialsConfig struct {
+	EnvFilename string
+	ServiceEnv  EvernoteService
 }
-
-type evernoteCredentials struct{ Token, Key, Secret string }
 
 const (
 	_ProductionTokenName  = "EVERNOTE_PRODUCTION_TOKEN"
@@ -81,6 +79,11 @@ func MakeEnvFile(filename string) (err error) {
 
 var _TheStore *store
 
+type store struct {
+	edam.NoteStore
+	token string
+}
+
 // initStore returns a pointer to the singleton store. When first called, it
 // authenticates with the Evernote EDAM API using the credentials in the .env
 // file. Upon success, it is initialized and cached for subsequent calls. An
@@ -90,60 +93,75 @@ func initStore(ctx context.Context) (*store, error) {
 		return _TheStore, nil
 	}
 	var (
-		err                error
-		s                  *store
-		evernoteServiceEnv EvernoteService
-		credentials        evernoteCredentials
-		baseENClient       *en.EvernoteClient
-		userURLs           *edam.UserUrls
-		userClient         *edam.UserStoreClient
-		noteClient         *edam.NoteStoreClient
+		err          error
+		s            *store
+		credsConf    CredentialsConfig
+		credentials  userCredentials
+		baseENClient *en.EvernoteClient
+		userURLs     *edam.UserUrls
+		userClient   *edam.UserStoreClient
+		noteClient   *edam.NoteStoreClient
 	)
-	if err = godotenv.Load(); err != nil {
+	if val, ok := ctx.Value(EvernoteServiceKey).(CredentialsConfig); ok {
+		credsConf = val
+	} else {
+		return nil, fmt.Errorf("could not read initial credentials config from context")
+	}
+
+	if credentials, err = loadEnv(credsConf); err != nil {
 		return nil, err
 	}
-	if val, ok := ctx.Value(EvernoteServiceKey).(EvernoteService); ok {
-		evernoteServiceEnv = val
-	}
-	if evernoteServiceEnv == EvernoteProductionService {
-		credentials = evernoteCredentials{
-			Token:  os.Getenv(_ProductionTokenName),
-			Key:    os.Getenv(_ProductionKeyName),
-			Secret: os.Getenv(_ProductionSecretName),
-		}
-	} else {
-		credentials = evernoteCredentials{
-			Token:  os.Getenv(_SandboxTokenName),
-			Key:    os.Getenv(_SandboxKeyName),
-			Secret: os.Getenv(_SandboxSecretName),
-		}
-	}
-	s = &store{credentials: &credentials}
+
 	baseENClient = en.NewClient(
-		s.credentials.Key,
-		s.credentials.Secret,
-		en.EnvironmentType(evernoteServiceEnv),
+		credentials.key,
+		credentials.secret,
+		en.EnvironmentType(credsConf.ServiceEnv),
 	)
 	if userClient, err = baseENClient.GetUserStore(); err != nil {
-		return nil, err
+		return nil, makeError(err)
 	}
-	if userURLs, err = userClient.GetUserUrls(ctx, s.credentials.Token); err != nil {
-		return nil, err
+	if userURLs, err = userClient.GetUserUrls(ctx, credentials.token); err != nil {
+		return nil, makeError(err)
 	}
 	if noteClient, err = baseENClient.GetNoteStoreWithURL(userURLs.GetNoteStoreUrl()); err != nil {
-		return nil, err
+		return nil, makeError(err)
 	}
-	s.noteClient = &edamNoteStore{
+	s = &store{
 		NoteStore: noteClient,
-		token:     s.credentials.Token,
+		token:     credentials.token,
 	}
 	_TheStore = s
 	return _TheStore, nil
 }
 
-type edamNoteStore struct {
-	edam.NoteStore
-	token string
+type userCredentials struct{ token, key, secret string }
+
+// loadEnv produces user account credentials from environment variables. The
+// credentials can be read from envfile or can be passed in from the command
+// line. ie: `FOO=bar cmd args ...`. The imported library allows you to pass no
+// arguments to read env vars from a file named .env. This might make sense for
+// a web service because the working directory is fixed. I don't think this
+// makes sense for a command because the working directory could be anywhere.
+// Furthermore, this is sensitive information, that should be managed by the
+// caller. Should the user choose to read from an env var file, force a
+// non-empty name.
+func loadEnv(credsConf CredentialsConfig) (userCredentials, error) {
+	var out userCredentials
+	if credsConf.EnvFilename != "" {
+		if err := godotenv.Load(credsConf.EnvFilename); err != nil {
+			return out, fmt.Errorf("could not load env vars; %v", err)
+		}
+	}
+	if credsConf.ServiceEnv == EvernoteProductionService {
+		out.token = os.Getenv(_ProductionTokenName)
+		out.key = os.Getenv(_ProductionKeyName)
+		out.secret = os.Getenv(_ProductionSecretName)
+	} else {
+		out.token = os.Getenv(_SandboxTokenName)
+		out.key = os.Getenv(_SandboxKeyName)
+		out.secret = os.Getenv(_SandboxSecretName)
+	}
+	return out, nil
 }
 
 // makeTimestamp converts an edam Timestamp to a regular golang time.Time in

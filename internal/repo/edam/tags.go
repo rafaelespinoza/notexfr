@@ -27,7 +27,7 @@ func (n *Tags) FetchRemote(ctx context.Context) (out []entity.LinkID, err error)
 	if s, err = initStore(ctx); err != nil {
 		return
 	}
-	if tags, err = s.noteClient.ListTags(ctx, s.noteClient.token); err != nil {
+	if tags, err = s.ListTags(ctx, s.token); err != nil {
 		err = makeError(err)
 		return
 	}
