@@ -20,6 +20,7 @@ type arguments struct {
 	fetchWriteOpts *interactor.FetchWriteOptions
 	enexExportOpts *enex.FileOpts
 	backfillOpts   *interactor.BackfillOpts
+	convertOpts    *interactor.ConvertOptions
 }
 
 var (

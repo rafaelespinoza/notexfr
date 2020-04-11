@@ -154,9 +154,11 @@ func initEvernoteItems(ctx context.Context, opts *BackfillOpts) (out *serviceIte
 		if list, err = readLocalFile(ctx, repository, input.filename); err != nil {
 			return
 		}
-		collection := make(keyedItems)
-		for _, item := range list {
-			collection[item.GetID()] = item
+		collection := makeKeyedItems(len(list))
+		for i, item := range list {
+			itemID := item.GetID()
+			collection.items[itemID] = item
+			collection.keys[i] = itemID
 		}
 		// this might lead to memory leaks. check it.
 		*input.target = collection
@@ -170,29 +172,46 @@ func initStandardNotesItems(ctx context.Context, opts *BackfillOpts) (out *servi
 		return
 	}
 
-	noteItems, tagItems := make(map[string]entity.LinkID), make(map[string]entity.LinkID)
-	for _, item := range notes {
-		noteItems[item.GetID()] = item
+	keyedNoteItems, keyedTagItems := makeKeyedItems(len(notes)), makeKeyedItems(len(tags))
+	for i, item := range notes {
+		itemID := item.GetID()
+		keyedNoteItems.items[itemID] = item
+		keyedNoteItems.keys[i] = itemID
 	}
-	for _, item := range tags {
-		tagItems[item.GetID()] = item
+	for i, item := range tags {
+		itemID := item.GetID()
+		keyedTagItems.items[itemID] = item
+		keyedTagItems.keys[i] = itemID
 	}
 
 	out = &serviceItems{
-		notes: noteItems,
-		tags:  tagItems,
+		notes: keyedNoteItems,
+		tags:  keyedTagItems,
 	}
 	return
 }
 
 // keyedItems is a collection resources that is indexed by some unique key,
 // such as an ID, where all items originate from the same service provider.
-type keyedItems map[string]entity.LinkID
+// The keys field preserves the insertion order so you can iterate through items
+// for easier comparison to the original inputs while still providing the
+// benefit of constant-time lookups.
+type keyedItems struct {
+	keys  []string
+	items map[string]entity.LinkID
+}
+
+func makeKeyedItems(numKeys int) keyedItems {
+	return keyedItems{
+		items: make(map[string]entity.LinkID),
+		keys:  make([]string, numKeys),
+	}
+}
 
 func (m keyedItems) each(cb func(item entity.LinkID) error) (err error) {
-	for key, item := range m {
-		if err = cb(item); err != nil {
-			err = fmt.Errorf("%w; key: %q", err, key)
+	for i, key := range m.keys {
+		if err = cb(m.items[key]); err != nil {
+			err = fmt.Errorf("%w; ind: %d, key: %q", err, i, key)
 			return
 		}
 	}

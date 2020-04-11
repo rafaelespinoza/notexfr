@@ -2,10 +2,7 @@ package repo
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
@@ -17,21 +14,6 @@ var Error = errors.New("repo error")
 // FetchResources makes an API call for remote resources.
 func FetchResources(ctx context.Context, repository entity.RepoRemote) (resources []entity.LinkID, err error) {
 	resources, err = repository.FetchRemote(ctx)
-	return
-}
-
-// WriteResourcesJSON marshalizes resources to JSON and writes to a local file.
-// If filename is empty, then it prints to standard output.
-func WriteResourcesJSON(resources []entity.LinkID, filename string) (err error) {
-	data, err := json.Marshal(resources)
-	if err != nil {
-		return
-	}
-	if filename == "" {
-		fmt.Println(string(data))
-		return
-	}
-	err = ioutil.WriteFile(filename, data, os.FileMode(0644))
 	return
 }
 
@@ -48,6 +30,5 @@ func ReadLocalFile(ctx context.Context, repository entity.RepoLocal, filename st
 	return repository.ReadLocal(ctx, file)
 }
 
-// NewServiceID returns an *entity.ServiceID so use cases don't need to directly
-// depend on the entity package.
+// NewServiceID creates a ServiceID.
 func NewServiceID(id string) entity.Resource { return &entity.ServiceID{Value: id} }

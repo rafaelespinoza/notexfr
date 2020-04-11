@@ -217,10 +217,11 @@ const (
 	ContentTypeUnknown ContentType = iota
 	ContentTypeNote
 	ContentTypeTag
+	ContentTypeNotebook
 )
 
 func (c ContentType) String() string {
-	return [...]string{"", "Note", "Tag"}[c]
+	return [...]string{"", "Note", "Tag", "Notebook"}[c]
 }
 
 func (c *ContentType) MarshalJSON() (data []byte, err error) {
@@ -237,6 +238,8 @@ func (c *ContentType) UnmarshalJSON(data []byte) (err error) {
 	case "Note", "note":
 		*c = ContentTypeNote
 	case "Tag", "tag":
+		*c = ContentTypeTag
+	case "Notebook", "notebook":
 		*c = ContentTypeTag
 	default:
 		err = fmt.Errorf("%w; got %q", errContentTypeInvalid, s)

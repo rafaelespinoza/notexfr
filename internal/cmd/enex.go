@@ -101,6 +101,44 @@ var _Enex = func(cmdName string) *delegator {
 				)
 			},
 		},
+		"to-sn": &command{
+			description: "convert ENEX file to StandardNotes format",
+			setup: func(a *arguments) *flag.FlagSet {
+				subcmdName := cmdName + " to-sn"
+				var opts interactor.ConvertOptions
+				flags := flag.NewFlagSet(subcmdName, flag.ExitOnError)
+				flags.StringVar(
+					&opts.InputFilename,
+					"input",
+					"",
+					"path to evernote export file",
+				)
+				flags.StringVar(
+					&opts.OutputFilename,
+					"output",
+					"",
+					"path to output file",
+				)
+				flags.Usage = func() {
+					fmt.Printf(`Usage: %s %s
+
+	Parse, read an Evernote ENEX file, convert to StandardNotes JSON format.`,
+						_Bin, subcmdName)
+
+					fmt.Printf("\n\nFlags:\n\n")
+					flags.PrintDefaults()
+				}
+				a.convertOpts = &opts
+				return flags
+			},
+			run: func(ctx context.Context, a *arguments) error {
+				_, err := interactor.ConvertENEXToStandardNotes(
+					context.Background(),
+					*a.convertOpts,
+				)
+				return err
+			},
+		},
 	}
 
 	descriptions := describeSubcommands(cmd.subs)

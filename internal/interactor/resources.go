@@ -2,7 +2,10 @@ package interactor
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
@@ -95,12 +98,23 @@ func fetchResources(ctx context.Context, repository entity.LocalRemoteRepo, opts
 	return
 }
 
-func writeResources(resources []entity.LinkID, output string, verbose bool, name string) (err error) {
-	if err = repo.WriteResourcesJSON(resources, output); err != nil {
+// writeResources marshalizes resources to JSON and writes to a local file. If
+// filename is empty, then it prints to standard output.
+func writeResources(resources interface{}, filename string, verbose bool, name string) (err error) {
+	data, err := json.Marshal(resources)
+	if err != nil {
+		return
+	}
+	if filename == "" {
+		fmt.Println(string(data))
+		return
+	}
+	err = ioutil.WriteFile(filename, data, os.FileMode(0644))
+	if err != nil {
 		return
 	}
 	if verbose {
-		fmt.Printf("wrote %s to %q\n", name, output)
+		fmt.Printf("wrote %s to %q\n", name, filename)
 	}
 	return
 }

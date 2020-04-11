@@ -95,6 +95,56 @@ var _Edam = func(cmdName string) *delegator {
 				)
 			},
 		},
+		"to-sn": &command{
+			description: "convert EDAM JSON files to StandardNotes format",
+			setup: func(a *arguments) *flag.FlagSet {
+				subcmdName := cmdName + " to-sn"
+				var opts interactor.ConvertOptions
+				flags := flag.NewFlagSet(subcmdName, flag.ExitOnError)
+				flags.Usage = func() {
+					fmt.Printf(`Usage: %s %s
+
+	Parse, read local Evernote data, convert to StandardNotes JSON format.`,
+						_Bin, subcmdName)
+
+					fmt.Printf("\n\nFlags:\n\n")
+					flags.PrintDefaults()
+				}
+				flags.StringVar(
+					&opts.InputFilenames.Notebooks,
+					"input-en-notebooks",
+					"",
+					"path to Evernote notebooks data file",
+				)
+				flags.StringVar(
+					&opts.InputFilenames.Notes,
+					"input-en-notes",
+					"",
+					"path to Evernote notes data file",
+				)
+				flags.StringVar(
+					&opts.InputFilenames.Tags,
+					"input-en-tags",
+					"",
+					"path to Evernote tags data file",
+				)
+				flags.StringVar(
+					&opts.OutputFilename,
+					"output",
+					"",
+					"path to output file",
+				)
+				a.convertOpts = &opts
+				return flags
+			},
+			run: func(ctx context.Context, a *arguments) error {
+				_, err := interactor.ConvertEDAMToStandardNotes(
+					context.Background(),
+					*a.convertOpts,
+				)
+				return err
+			},
+		},
 	}
 
 	descriptions := describeSubcommands(cmd.subs)
