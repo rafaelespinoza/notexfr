@@ -33,10 +33,10 @@ func ReadConversionFile(filename string) (notes, tags []entity.LinkID, err error
 
 	for _, item := range metadatas.Items {
 		switch typ := item.contentType(); typ {
-		case contentTypeNote:
+		case ContentTypeNote:
 			item.Note.ServiceID = &entity.ServiceID{Value: item.Note.UUID}
 			notes = append(notes, item.Note)
-		case contentTypeTag:
+		case ContentTypeTag:
 			item.Tag.ServiceID = &entity.ServiceID{Value: item.Tag.UUID}
 			tags = append(tags, item.Tag)
 		default:
@@ -48,7 +48,7 @@ func ReadConversionFile(filename string) (notes, tags []entity.LinkID, err error
 }
 
 type contentTypeOption interface {
-	contentType() contentType
+	contentType() ContentType
 }
 
 // A convfileItem helps parse an item in an input file, which contains an items
@@ -65,11 +65,11 @@ var (
 	_ contentTypeOption = (*convfileItem)(nil)
 )
 
-func (c *convfileItem) contentType() (out contentType) {
+func (c *convfileItem) contentType() (out ContentType) {
 	if c.Note != nil {
-		out = contentTypeNote
+		out = ContentTypeNote
 	} else if c.Tag != nil {
-		out = contentTypeTag
+		out = ContentTypeTag
 	}
 	return
 }
@@ -86,19 +86,19 @@ func (c *convfileItem) MarshalJSON() (data []byte, err error) {
 }
 
 func (c *convfileItem) UnmarshalJSON(data []byte) (err error) {
-	var metadata Metadata
-	if err = json.Unmarshal(data, &metadata); err != nil {
+	var item Item
+	if err = json.Unmarshal(data, &item); err != nil {
 		return
 	}
-	switch metadata.ContentType {
-	case contentTypeNote:
+	switch item.ContentType {
+	case ContentTypeNote:
 		var note Note
 		if err = json.Unmarshal(data, &note); err != nil {
 			return
 		}
 		note.truncateTimes(time.Second)
 		c.Note = &note
-	case contentTypeTag:
+	case ContentTypeTag:
 		var tag Tag
 		if err = json.Unmarshal(data, &tag); err != nil {
 			return
@@ -111,30 +111,33 @@ func (c *convfileItem) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
-// Metadata is relevant data common to all StandardNote item types. It's
-// loosely based off https://docs.standardnotes.org/specification/sync/#items.
-type Metadata struct {
-	CreatedAt         time.Time   `json:"created_at"`
-	UpdatedAt         time.Time   `json:"updated_at"`
-	ContentType       contentType `json:"content_type"`
-	UUID              string      `json:"uuid"`
+// An Item is an abstract type that should be embedded into a more concrete
+// type such as a Note or a Tag. It contains metadata common to all
+// StandardNotes item types and is loosely based off of
+// https://docs.standardnotes.org/specification/sync/#items.
+type Item struct {
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
+	ContentType ContentType `json:"content_type"`
+	UUID        string      `json:"uuid"`
+	Content     struct {
+		Title      string                 `json:"title"`
+		References []Reference            `json:"references"`
+		AppData    map[string]interface{} `json:"appData,omitempty"`
+	} `json:"content"`
 	*entity.ServiceID `json:"-"`
 }
 
-func (m *Metadata) contentType() contentType { return m.ContentType }
+func (i *Item) contentType() ContentType { return i.ContentType }
 
-func (m *Metadata) truncateTimes(dur time.Duration) {
-	m.CreatedAt = m.CreatedAt.Truncate(dur)
-	m.UpdatedAt = m.UpdatedAt.Truncate(dur)
+func (i *Item) truncateTimes(dur time.Duration) {
+	i.CreatedAt = i.CreatedAt.Truncate(dur)
+	i.UpdatedAt = i.UpdatedAt.Truncate(dur)
 }
 
 // Note is an item in a conversion file with a content type of Note.
 type Note struct {
-	Metadata
-	Content struct {
-		Title      string `json:"title"`
-		References []references
-	} `json:"content"`
+	Item
 }
 
 func (n *Note) LinkValues() []string {
@@ -148,7 +151,7 @@ func (n *Note) LinkValues() []string {
 func (n *Note) AppendTags(ids ...string) (nextLen int) {
 	currMembers := make(map[string]struct{})
 	for _, ref := range n.Content.References {
-		if ref.ContentType == contentTypeTag {
+		if ref.ContentType == ContentTypeTag {
 			currMembers[ref.UUID] = struct{}{}
 		}
 	}
@@ -157,9 +160,9 @@ func (n *Note) AppendTags(ids ...string) (nextLen int) {
 		if _, ok := currMembers[id]; ok {
 			continue
 		}
-		n.Content.References = append(n.Content.References, references{
+		n.Content.References = append(n.Content.References, Reference{
 			UUID:        id,
-			ContentType: contentTypeTag,
+			ContentType: ContentTypeTag,
 		})
 	}
 	nextLen = len(n.Content.References)
@@ -170,67 +173,68 @@ func fmtTime(t time.Time) string { return t.Format(entity.Timeformat) }
 
 // Tag is an item in a conversion file with a content type of Tag.
 type Tag struct {
-	Metadata
-	Content struct {
-		Title      string `json:"title"`
-		References []references
-	} `json:"content"`
+	Item
 }
 
-// NewTag constructs a basic *ConvfileTag. It doesn't set all possible fields.
+// NewTag constructs a basic *Tag.
 func NewTag(title string, created, updated time.Time) *Tag {
-	return &Tag{
-		Metadata: Metadata{
-			CreatedAt:   created,
-			UpdatedAt:   updated,
-			ContentType: contentTypeTag,
-			ServiceID:   &entity.ServiceID{Value: ""},
-		},
+	item := Item{
+		CreatedAt:   created,
+		UpdatedAt:   updated,
+		ContentType: ContentTypeTag,
+		ServiceID:   &entity.ServiceID{Value: ""},
 		Content: struct {
-			Title      string `json:"title"`
-			References []references
+			Title      string                 `json:"title"`
+			References []Reference            `json:"references"`
+			AppData    map[string]interface{} `json:"appData,omitempty"`
 		}{
-			Title: title,
+			Title:      title,
+			References: make([]Reference, 0),
+			AppData:    make(map[string]interface{}),
 		},
 	}
+	return &Tag{item}
 }
 
 func (t *Tag) LinkValues() []string { return []string{t.Content.Title} }
 
-type references struct {
+// A Reference is additional metadata for associating items.
+type Reference struct {
 	UUID        string      `json:"uuid"`
-	ContentType contentType `json:"content_type"`
+	ContentType ContentType `json:"content_type"`
 }
 
 var errContentTypeInvalid = errors.New("content_type invalid")
 
-type contentType uint8
+// ContentType describes the item.
+type ContentType uint8
 
+// These are the most common types of content, the first is a default value.
 const (
-	contentTypeUnknown contentType = iota
-	contentTypeNote
-	contentTypeTag
+	ContentTypeUnknown ContentType = iota
+	ContentTypeNote
+	ContentTypeTag
 )
 
-func (c contentType) String() string {
+func (c ContentType) String() string {
 	return [...]string{"", "Note", "Tag"}[c]
 }
 
-func (c *contentType) MarshalJSON() (data []byte, err error) {
+func (c *ContentType) MarshalJSON() (data []byte, err error) {
 	data = []byte(`"` + c.String() + `"`)
 	return
 }
 
-func (c *contentType) UnmarshalJSON(data []byte) (err error) {
+func (c *ContentType) UnmarshalJSON(data []byte) (err error) {
 	var s string
 	if err = json.Unmarshal(data, &s); err != nil {
 		return
 	}
 	switch s {
 	case "Note", "note":
-		*c = contentTypeNote
+		*c = ContentTypeNote
 	case "Tag", "tag":
-		*c = contentTypeTag
+		*c = ContentTypeTag
 	default:
 		err = fmt.Errorf("%w; got %q", errContentTypeInvalid, s)
 	}
