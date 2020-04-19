@@ -76,6 +76,7 @@ var _Edam = func(cmdName string) *delegator {
 				return flags
 			},
 			run: func(ctx context.Context, a *arguments) error {
+				a.fetchWriteOpts.NotesQueryParams.Verbose = a.fetchWriteOpts.Verbose
 				return interactor.FetchWriteNotes(
 					newEdamContext(ctx, a.production),
 					a.fetchWriteOpts,
@@ -132,14 +133,12 @@ func setupFetchWriteCommands(a *arguments, name string) *flag.FlagSet {
 		"",
 		"path to write data as JSON",
 	)
-	var timeout time.Duration
 	flags.DurationVar(
-		&timeout,
+		&opts.Timeout,
 		"timeout",
 		time.Duration(15)*time.Second,
 		"how long to wait before timing out",
 	)
-	opts.Timeout = timeout
 	flags.BoolVar(&opts.Verbose, "verbose", false, "output stuff as it happens")
 	a.fetchWriteOpts = &opts
 	flags.Usage = func() {

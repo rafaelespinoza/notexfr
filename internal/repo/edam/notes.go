@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
@@ -55,6 +56,9 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error
 
 	for !pagination.done {
 		var ierr error
+		if n.rqp.Verbose {
+			fmt.Printf("fetching metadata, running total: %d\n", len(out))
+		}
 		notesMetadataList, ierr := s.noteClient.FindNotesMetadata(
 			ctx,
 			s.noteClient.token,
@@ -68,26 +72,52 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error
 			return
 		}
 		notesMetadata := notesMetadataList.GetNotes()
-		numResults := len(notesMetadata)
-		subList := make([]entity.LinkID, numResults)
+		numResultsInRange := len(notesMetadata)
+		numTotalResults := notesMetadataList.GetTotalNotes()
+		subList := make([]entity.LinkID, numResultsInRange)
 		ierr = pagination.update(
 			notesMetadataList.GetStartIndex(),
-			int32(numResults),
+			int32(numResultsInRange),
 		)
 		if ierr != nil {
 			err = ierr
 			return
 		}
 
-		var note entity.LinkID
+		resultSpec := &edam.NoteResultSpec{IncludeContent: &yes}
+		if n.rqp.Verbose {
+			fmt.Printf("\tdone fetching metadata, results %d\n", len(notesMetadata))
+		}
 		for i, noteMeta := range notesMetadata {
-			if note, ierr = newNote(noteMeta); ierr != nil {
+			noteID := noteMeta.GetGUID()
+			if n.rqp.Verbose && numResultsInRange > 1 && i%(numResultsInRange/2) == 0 {
+				fmt.Printf("\tfetching note content %d/%d\n", len(out)+i, numTotalResults)
+			}
+			result, ierr := s.noteClient.GetNoteWithResultSpec(
+				ctx,
+				s.noteClient.token,
+				noteID,
+				resultSpec,
+			)
+			if ierr != nil {
+				err = fmt.Errorf(
+					"%w, noteID: %q, noteContentLength %d",
+					ierr, noteID, noteMeta.GetContentLength(),
+				)
+				return
+			}
+			note, ierr := newNote(noteMeta, result.GetContent())
+			if ierr != nil {
 				err = ierr
 				return
 			}
+
 			subList[i] = note
 		}
 		out = append(out, subList...)
+		if n.rqp.Verbose {
+			fmt.Printf("\tdone fetching contents, total so far: %d\n", len(out))
+		}
 	}
 	return
 }
@@ -99,12 +129,18 @@ type NotesRemoteQueryParams struct {
 	PageSize   int
 	TagIDs     []string
 	NotebookID string
+	Verbose    bool
 }
 
 // toFilter converts the params note search options. The default order is by
 // created at, which is good because it doesn't change.
 func (p *NotesRemoteQueryParams) toFilter() *edam.NoteFilter {
-	filt := &edam.NoteFilter{}
+	order := int32(edam.NoteSortOrder_CREATED)
+	ascending := true
+	filt := &edam.NoteFilter{
+		Order:     &order,
+		Ascending: &ascending,
+	}
 	if p.TagIDs != nil && len(p.TagIDs) > 0 {
 		tagGUIDs := make([]edam.GUID, len(p.TagIDs))
 		for i, id := range p.TagIDs {
@@ -154,7 +190,7 @@ func (p *paginator) update(startIndex, totalResults int32) (err error) {
 	return
 }
 
-func newNote(noteMeta *edam.NoteMetadata) (resource entity.LinkID, err error) {
+func newNote(noteMeta *edam.NoteMetadata, content string) (resource entity.LinkID, err error) {
 	// cannot fill the Tags field (name of the tag itself) from here, but it can
 	// be "backfilled" after grabbing the tag data in a separate request.
 	id := string(noteMeta.GetGUID())
@@ -162,6 +198,7 @@ func newNote(noteMeta *edam.NoteMetadata) (resource entity.LinkID, err error) {
 		ID:         id,
 		Title:      noteMeta.GetTitle(),
 		NotebookID: noteMeta.GetNotebookGuid(),
+		Content:    content,
 		CreatedAt:  makeTimestamp(noteMeta.GetCreated()),
 		UpdatedAt:  makeTimestamp(noteMeta.GetUpdated()),
 	}

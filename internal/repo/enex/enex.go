@@ -75,6 +75,7 @@ func newNoteFromEnex(enexNote *enex.Note) (resource entity.LinkID, err error) {
 			Tags:      enexNote.Tags,
 			CreatedAt: createdAt,
 			UpdatedAt: updatedAt,
+			Content:   enexNote.Content.XML,
 			Attributes: &entity.Attributes{
 				Source:    enexNote.Source,
 				SourceURL: sourceURL,

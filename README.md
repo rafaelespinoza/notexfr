@@ -17,8 +17,8 @@ Think of it as a backfill.
 - Format Evernote notebooks into data suitable for import into StandardNotes.
 - Re-associate StandardNotes notes with Evernote Notebook metadata.
 - Identify Evernote tags, notes that correspond to StandardNotes tags, notes.
-- Fetch Note, Notebook, Tag metadata from your Evernote account (using the EDAM
-  API) and write to local JSON files. No note content is saved, only metadata.
+- Fetch Note, Notebook, Tag data from your Evernote account (using the EDAM API)
+  and write to local JSON files.
 - Inspect ENEX file (Evernote's export format).
 
 #### Why would you use it?
@@ -50,8 +50,7 @@ go get github.com/rafaelespinoza/snbackfill
 You would need a developer token with full access to your account. This is so
 you can download the data necessary to make associations to your standardnotes
 account data. Part of that includes reading existing content, which requires
-full access to your account. This program does not use any note content, it only
-uses metadata such as timestamps, internal ids and names of resources.
+full access to your account.
 
 Visit the [Evernote developer documentation](https://dev.evernote.com/doc) site.
 

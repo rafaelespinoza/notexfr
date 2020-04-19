@@ -31,6 +31,8 @@ type (
 		TagIDs []string
 		// Tags is a list of tag names for the note.
 		Tags []string
+		// Content is the text content of the note.
+		Content string
 		// CreatedAt is modeled after the Created field.
 		CreatedAt time.Time
 		// UpdatedAt is modeled after the Updated field.

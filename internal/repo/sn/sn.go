@@ -115,6 +115,7 @@ func (c *convfileItem) UnmarshalJSON(data []byte) (err error) {
 // type such as a Note or a Tag. It contains metadata common to all
 // StandardNotes item types and is loosely based off of
 // https://docs.standardnotes.org/specification/sync/#items.
+// There is a field to store text content, but is only relevant for notes.
 type Item struct {
 	CreatedAt   time.Time   `json:"created_at"`
 	UpdatedAt   time.Time   `json:"updated_at"`
@@ -123,6 +124,7 @@ type Item struct {
 	Content     struct {
 		Title      string                 `json:"title"`
 		References []Reference            `json:"references"`
+		Text       string                 `json:"text,omitempty"`
 		AppData    map[string]interface{} `json:"appData,omitempty"`
 	} `json:"content"`
 	*entity.ServiceID `json:"-"`
@@ -186,6 +188,7 @@ func NewTag(title string, created, updated time.Time) *Tag {
 		Content: struct {
 			Title      string                 `json:"title"`
 			References []Reference            `json:"references"`
+			Text       string                 `json:"text,omitempty"`
 			AppData    map[string]interface{} `json:"appData,omitempty"`
 		}{
 			Title:      title,
