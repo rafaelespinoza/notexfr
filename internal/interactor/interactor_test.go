@@ -16,11 +16,12 @@ import (
 )
 
 const (
-	_BaseTestOutputDir = "/tmp/snbackfill_test/entity/interactor"
+	_BaseTestOutputDir = "/tmp/snbackfill_test/internal/interactor"
 	_FixturesDir       = "../../internal/fixtures"
 	_StubNotebooksFile = "edam_notebooks.json"
 	_StubNotesFile     = "edam_notes.json"
 	_StubTagsFile      = "edam_tags.json"
+	_StubENEXFile      = "test_export.enex"
 	_StubENtoSNFile    = "evernote-to-sn.txt"
 )
 

@@ -1,4 +1,6 @@
-// Package enex specifically handles Evernote export files.
+// Package enex specifically handles Evernote export files. The file is a
+// specialized XML format called ENEX. More info can be found at
+// https://evernote.com/blog/how-evernotes-xml-export-format-works/.
 package enex
 
 import (
@@ -7,10 +9,12 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/macrat/go-enex"
 	"github.com/rafaelespinoza/snbackfill/internal/entity"
+	"golang.org/x/net/html"
 )
 
 // File implements the local repository interface for enex files.
@@ -55,6 +59,35 @@ func (n *Note) LinkValues() []string {
 		n.Title,
 		n.UpdatedAt.Format(entity.Timeformat),
 	}
+}
+
+// HTMLContent extracts the HTML from the note content.
+func (n *Note) HTMLContent() (string, error) {
+	root, err := html.Parse(strings.NewReader(n.Content))
+	if err != nil {
+		return "", err
+	}
+	// descend to <en-note> and capture its children.
+	var curr *html.Node
+	curr = root.LastChild
+	if curr.Data != "html" {
+		return "", fmt.Errorf("could not find node: html")
+	}
+	curr = curr.LastChild
+	if curr.Data != "body" {
+		return "", fmt.Errorf("could not find node: html.body")
+	}
+	curr = curr.FirstChild
+	if curr.Data != "en-note" {
+		return "", fmt.Errorf("could not find node: html.body.en-note")
+	}
+	var bld strings.Builder
+	for curr = curr.FirstChild; curr != nil; curr = curr.NextSibling {
+		if err = html.Render(&bld, curr); err != nil {
+			return "", err
+		}
+	}
+	return bld.String(), nil
 }
 
 func newNoteFromEnex(enexNote *enex.Note) (resource entity.LinkID, err error) {

@@ -3,6 +3,7 @@ package interactor
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/google/uuid"
@@ -148,6 +149,10 @@ func (c *edamToSN) convertToSN(in []entity.LinkID) ([]entity.LinkID, error) {
 			noteIDsByNotebookID[item.NotebookID],
 			item.ID,
 		)
+		text, xerr := extractNoteContent(item)
+		if xerr != nil {
+			return nil, xerr
+		}
 		notes = append(notes, &sn.Note{
 			Item: sn.Item{
 				CreatedAt:   item.CreatedAt,
@@ -168,6 +173,7 @@ func (c *edamToSN) convertToSN(in []entity.LinkID) ([]entity.LinkID, error) {
 							ContentType: sn.ContentTypeNotebook,
 						},
 					),
+					Text: text,
 					AppData: map[string]interface{}{
 						"org.standardnotes.sn": &SNItemAppData{
 							ClientUpdatedAt: &item.UpdatedAt,
@@ -325,7 +331,11 @@ func (c *enexToSN) convertToSN(in []entity.LinkID) (out []entity.LinkID, err err
 				},
 			)
 		}
-
+		text, xerr := extractNoteContent(enexNote)
+		if xerr != nil {
+			err = xerr
+			return
+		}
 		out[i] = &sn.Note{
 			Item: sn.Item{
 				CreatedAt:   enexNote.CreatedAt,
@@ -340,6 +350,7 @@ func (c *enexToSN) convertToSN(in []entity.LinkID) (out []entity.LinkID, err err
 				}{
 					Title:      enexNote.Title,
 					References: tagReferences,
+					Text:       text,
 					AppData: map[string]interface{}{
 						"org.standardnotes.sn": &SNItemAppData{
 							ClientUpdatedAt: &enexNote.UpdatedAt,
@@ -353,6 +364,25 @@ func (c *enexToSN) convertToSN(in []entity.LinkID) (out []entity.LinkID, err err
 		out = append(out, listOfTags[i])
 	}
 	return
+}
+
+var (
+	enexLineBreakPattern = regexp.MustCompile(`/<br[^>]*>/g`)
+	enexListItemPattern  = regexp.MustCompile(`/<li[^>]*>/g`)
+)
+
+type noteWithHTMLContent interface {
+	HTMLContent() (out string, err error)
+}
+
+func extractNoteContent(note noteWithHTMLContent) (string, error) {
+	content, err := note.HTMLContent()
+	if err != nil {
+		return "", err
+	}
+	out := enexLineBreakPattern.ReplaceAllString(content, "\n\n")
+	out = enexListItemPattern.ReplaceAllString(out, "\n")
+	return out, nil
 }
 
 // SNItemAppData is extra metadata attached to a StandardNotes Item that should
