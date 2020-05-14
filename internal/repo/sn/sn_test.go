@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
-	"github.com/rafaelespinoza/snbackfill/internal/repo/sn"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/repo/sn"
 )
 
 const (

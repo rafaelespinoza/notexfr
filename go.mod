@@ -1,4 +1,4 @@
-module github.com/rafaelespinoza/snbackfill
+module github.com/rafaelespinoza/notexfr
 
 go 1.14
 

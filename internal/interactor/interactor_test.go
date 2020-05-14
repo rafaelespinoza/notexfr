@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
-	"github.com/rafaelespinoza/snbackfill/internal/interactor"
-	"github.com/rafaelespinoza/snbackfill/internal/repo/sn"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/interactor"
+	"github.com/rafaelespinoza/notexfr/internal/repo/sn"
 )
 
 const (
-	_BaseTestOutputDir = "/tmp/snbackfill_test/internal/interactor"
+	_BaseTestOutputDir = "/tmp/notexfr_test/internal/interactor"
 	_FixturesDir       = "../../internal/fixtures"
 	_StubNotebooksFile = "edam_notebooks.json"
 	_StubNotesFile     = "edam_notes.json"

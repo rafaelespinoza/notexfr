@@ -3,8 +3,8 @@ package enex_test
 import (
 	"testing"
 
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
-	"github.com/rafaelespinoza/snbackfill/internal/repo/enex"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/repo/enex"
 )
 
 func TestInterfaceImplementations(t *testing.T) {

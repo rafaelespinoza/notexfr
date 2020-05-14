@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
 )
 
 // ReadConversionFile takes the output file of a conversion performed at:

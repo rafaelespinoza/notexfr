@@ -1,12 +1,12 @@
 ```
-           _                _     __ _ _ _
- ___ _ __ | |__   __ _  ___| | __/ _(_) | |
-/ __| '_ \| '_ \ / _` |/ __| |/ / |_| | | |
-\__ \ | | | |_) | (_| | (__|   <|  _| | | |
-|___/_| |_|_.__/ \__,_|\___|_|\_\_| |_|_|_|
+                  __               ____
+   ____   ____ __/ /_ ___   _  __ / __/_____
+  / __ \ / __ \\  __// _ \ | |/_// /_ / ___/
+ / / / // /_/ // /_ /  __/_>  < / __// /
+/_/ /_/ \____/ \__/ \___//_/|_|/_/  /_/
 ```
 
-`snbackfill` is a tool to derive untransferred metadata when exporting Evernote
+`notexfr` is a tool to derive untransferred metadata when exporting Evernote
 data into [StandardNotes](https://standardnotes.org/), such as Notebooks and
 their associated Notes. It's not meant to replace the [existing data
 tools](https://dashboard.standardnotes.org/tools). Rather it fills in some gaps.
@@ -42,7 +42,7 @@ StandardNotes data.
 ## Getting Started
 
 ```
-go get github.com/rafaelespinoza/snbackfill
+go get github.com/rafaelespinoza/notexfr
 ```
 
 #### Evernote API
@@ -62,7 +62,7 @@ it's a manual process but they are usually pretty quick.
 Once you have that info, start an environment file template.
 
 ```
-snbackfill edam make-env
+notexfr edam make-env
 ```
 
 This creates a file at `.env`. Fill it in.

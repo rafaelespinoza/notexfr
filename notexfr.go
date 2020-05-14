@@ -1,5 +1,5 @@
-// The snbackfill command provides a CLI for various metadata management
-// operations in StandardNotes.
+// The notexfr command provides a CLI for various metadata management operations in
+// StandardNotes.
 package main
 
 import (
@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rafaelespinoza/snbackfill/internal/cmd"
+	"github.com/rafaelespinoza/notexfr/internal/cmd"
 )
 
 func init() {

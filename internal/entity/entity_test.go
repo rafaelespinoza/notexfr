@@ -3,7 +3,7 @@ package entity_test
 import (
 	"testing"
 
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
 )
 
 func TestInterfaceImplementations(t *testing.T) {

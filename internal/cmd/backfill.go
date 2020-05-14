@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/rafaelespinoza/snbackfill/internal/interactor"
+	"github.com/rafaelespinoza/notexfr/internal/interactor"
 )
 
 var _Backfill = func(cmdName string) *delegator {

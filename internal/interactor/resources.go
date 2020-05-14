@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
-	"github.com/rafaelespinoza/snbackfill/internal/repo"
-	"github.com/rafaelespinoza/snbackfill/internal/repo/edam"
-	"github.com/rafaelespinoza/snbackfill/internal/repo/enex"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/repo"
+	"github.com/rafaelespinoza/notexfr/internal/repo/edam"
+	"github.com/rafaelespinoza/notexfr/internal/repo/enex"
 )
 
 // FetchWriteOptions is a set of named arguments for fetching remote resources

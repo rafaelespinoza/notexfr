@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/macrat/go-enex"
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
 	"golang.org/x/net/html"
 )
 

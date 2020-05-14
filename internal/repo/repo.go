@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
 )
 
 // Error should wrap the error from a third party library.

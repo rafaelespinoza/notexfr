@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
 	"golang.org/x/net/html"
 
 	"github.com/dreampuf/evernote-sdk-golang/edam"

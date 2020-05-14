@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
-	"github.com/rafaelespinoza/snbackfill/internal/repo"
-	"github.com/rafaelespinoza/snbackfill/internal/repo/edam"
-	"github.com/rafaelespinoza/snbackfill/internal/repo/sn"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/repo"
+	"github.com/rafaelespinoza/notexfr/internal/repo/edam"
+	"github.com/rafaelespinoza/notexfr/internal/repo/sn"
 )
 
 var (

@@ -12,8 +12,8 @@ import (
 	en "github.com/dreampuf/evernote-sdk-golang/client"
 	"github.com/dreampuf/evernote-sdk-golang/edam"
 	"github.com/joho/godotenv"
-	"github.com/rafaelespinoza/snbackfill/internal/entity"
-	"github.com/rafaelespinoza/snbackfill/internal/repo"
+	"github.com/rafaelespinoza/notexfr/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/repo"
 )
 
 // EvernoteService enumerates different service environments when interacting
