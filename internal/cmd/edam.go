@@ -12,7 +12,7 @@ import (
 )
 
 var _Edam = func(cmdName string) *delegator {
-	cmd := &delegator{description: "do edam stuff"}
+	cmd := &delegator{description: "handle Evernote data from the EDAM API"}
 	const dotenvFilename = ".env"
 
 	// Define this field before defining the Usage function so the subcommand
@@ -69,7 +69,7 @@ var _Edam = func(cmdName string) *delegator {
 				flags.IntVar(
 					&listParams.PageSize,
 					"page-size",
-					4,
+					100,
 					"number of results to fetch at once",
 				)
 				a.fetchWriteOpts.NotesQueryParams = &listParams
@@ -93,56 +93,6 @@ var _Edam = func(cmdName string) *delegator {
 					newEdamContext(ctx, a.production),
 					a.fetchWriteOpts,
 				)
-			},
-		},
-		"to-sn": &command{
-			description: "convert EDAM JSON files to StandardNotes format",
-			setup: func(a *arguments) *flag.FlagSet {
-				subcmdName := cmdName + " to-sn"
-				var opts interactor.ConvertOptions
-				flags := flag.NewFlagSet(subcmdName, flag.ExitOnError)
-				flags.Usage = func() {
-					fmt.Printf(`Usage: %s %s
-
-	Parse, read local Evernote data, convert to StandardNotes JSON format.`,
-						_Bin, subcmdName)
-
-					fmt.Printf("\n\nFlags:\n\n")
-					flags.PrintDefaults()
-				}
-				flags.StringVar(
-					&opts.InputFilenames.Notebooks,
-					"input-en-notebooks",
-					"",
-					"path to Evernote notebooks data file",
-				)
-				flags.StringVar(
-					&opts.InputFilenames.Notes,
-					"input-en-notes",
-					"",
-					"path to Evernote notes data file",
-				)
-				flags.StringVar(
-					&opts.InputFilenames.Tags,
-					"input-en-tags",
-					"",
-					"path to Evernote tags data file",
-				)
-				flags.StringVar(
-					&opts.OutputFilename,
-					"output",
-					"",
-					"path to output file",
-				)
-				a.convertOpts = &opts
-				return flags
-			},
-			run: func(ctx context.Context, a *arguments) error {
-				_, err := interactor.ConvertEDAMToStandardNotes(
-					context.Background(),
-					*a.convertOpts,
-				)
-				return err
 			},
 		},
 	}
@@ -175,7 +125,7 @@ Subcommands:
 }("edam")
 
 func setupFetchWriteCommands(a *arguments, name string) *flag.FlagSet {
-	var opts interactor.FetchWriteOptions
+	var opts interactor.FetchWriteParams
 	flags := flag.NewFlagSet(name, flag.ExitOnError)
 	flags.StringVar(
 		&opts.OutputFilename,
@@ -190,11 +140,14 @@ func setupFetchWriteCommands(a *arguments, name string) *flag.FlagSet {
 		"how long to wait before timing out",
 	)
 	flags.BoolVar(&opts.Verbose, "verbose", false, "output stuff as it happens")
+	flags.BoolVar(&_Args.production, "production", false, "use production evernote account")
 	a.fetchWriteOpts = &opts
 	flags.Usage = func() {
 		fmt.Printf(`Usage: %s edam %s
 
-	Fetch %s from your Evernote account and write them to JSON files.`,
+	Fetch %s from your Evernote account and write them to JSON files.
+	Use your sandbox account by default. To use your production account, pass
+	the -production flag.`,
 			_Bin, name, name)
 
 		fmt.Printf("\n\nFlags:\n\n")

@@ -13,9 +13,9 @@ import (
 	"github.com/rafaelespinoza/notexfr/internal/repo/sn"
 )
 
-// ConvertOptions are named inputs and outputs for converting data between
+// ConvertParams are named inputs and outputs for converting data between
 // different formats.
-type ConvertOptions struct {
+type ConvertParams struct {
 	InputFilenames                struct{ Notebooks, Notes, Tags string }
 	InputFilename, OutputFilename string
 }
@@ -29,8 +29,8 @@ type SN struct {
 
 // ConvertEDAMToStandardNotes replicates the existing data conversion tools at
 // https://dashboard.standardnotes.org/tools.
-func ConvertEDAMToStandardNotes(ctx context.Context, opts ConvertOptions) (out *SN, err error) {
-	evernote, err := initEvernoteItems(ctx, &BackfillOpts{
+func ConvertEDAMToStandardNotes(ctx context.Context, opts ConvertParams) (out *SN, err error) {
+	evernote, err := initEvernoteItems(ctx, &BackfillParams{
 		EvernoteFilenames: struct{ Notebooks, Notes, Tags string }{
 			Notebooks: opts.InputFilenames.Notebooks,
 			Notes:     opts.InputFilenames.Notes,
@@ -66,7 +66,7 @@ func ConvertEDAMToStandardNotes(ctx context.Context, opts ConvertOptions) (out *
 
 // ConvertENEXToStandardNotes replicates the existing data conversion tools at
 // https://dashboard.standardnotes.org/tools.
-func ConvertENEXToStandardNotes(ctx context.Context, opts ConvertOptions) (out *SN, err error) {
+func ConvertENEXToStandardNotes(ctx context.Context, opts ConvertParams) (out *SN, err error) {
 	var (
 		repository                   entity.RepoLocal
 		converter                    *enexToSN
@@ -398,3 +398,7 @@ type SNItemAppData struct {
 	// ParentID could be the ID of a parent resource in the original service.
 	ParentID string `json:"parent_id,omitempty"`
 }
+
+var (
+	errTypeAssertion = fmt.Errorf("type assertion error")
+)

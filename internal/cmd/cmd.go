@@ -17,10 +17,10 @@ import (
 type arguments struct {
 	positionalArgs []string
 	production     bool
-	fetchWriteOpts *interactor.FetchWriteOptions
+	fetchWriteOpts *interactor.FetchWriteParams
 	enexExportOpts *enex.FileOpts
-	backfillOpts   *interactor.BackfillOpts
-	convertOpts    *interactor.ConvertOptions
+	backfillOpts   *interactor.BackfillParams
+	convertOpts    *interactor.ConvertParams
 }
 
 var (
@@ -38,6 +38,7 @@ func Init() {
 		description: "main command for " + _Bin,
 		subs: map[string]directive{
 			"backfill": _Backfill,
+			"convert":  _Convert,
 			"edam":     _Edam,
 			"enex":     _Enex,
 		},
@@ -50,13 +51,13 @@ func Init() {
 
 Description:
 
-	%s is a tool for managing Evernote export data.
+	%s is a tool for converting note data to other service formats.
 
-	The following flags should go before the subcommand.`,
+	Currently supported services:
+	- Evernote
+	- StandardNotes
+	`,
 			_Bin, _Bin)
-
-		fmt.Printf("\n\nFlags:\n\n")
-		flag.PrintDefaults()
 
 		fmt.Fprintf(flag.CommandLine.Output(), `
 Subcommands:
@@ -71,7 +72,6 @@ Examples:
 `,
 			strings.Join(descriptions, "\n\t"), _Bin)
 	}
-	flag.BoolVar(&_Args.production, "production", false, "use production evernote account")
 }
 
 // Run should be invoked in the main func in package main.
@@ -87,7 +87,6 @@ func Run(ctx context.Context) (err error) {
 		deleg = _MainCommand.selected
 	}
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	// a panic is possible here, but all direct children of the main command
@@ -96,7 +95,6 @@ func Run(ctx context.Context) (err error) {
 
 	if err = topic.perform(ctx, &_Args); err != nil {
 		topic.flags.Usage()
-		fmt.Println(err)
 		return
 	}
 
@@ -138,16 +136,23 @@ type delegator struct {
 func (d *delegator) summary() string { return d.description }
 
 // perform chooses a subcommand.
-func (d *delegator) perform(ctx context.Context, a *arguments) (err error) {
-	if len(a.positionalArgs) == 0 || a.positionalArgs[0] == "help" {
+func (d *delegator) perform(ctx context.Context, a *arguments) error {
+	if len(a.positionalArgs) < 1 {
+		return flag.ErrHelp
+	}
+	var err error
+	switch a.positionalArgs[0] {
+	case "-h", "-help", "--help", "help":
 		err = flag.ErrHelp
-	} else if cmd, ok := d.subs[a.positionalArgs[0]]; !ok {
-		err = fmt.Errorf("unknown command %q", a.positionalArgs[0])
-	} else {
-		d.selected = cmd
+	default:
+		if cmd, ok := d.subs[a.positionalArgs[0]]; !ok {
+			err = fmt.Errorf("unknown command %q", a.positionalArgs[0])
+		} else {
+			d.selected = cmd
+		}
 	}
 	if err != nil {
-		return
+		return err
 	}
 
 	switch selected := d.selected.(type) {
@@ -158,7 +163,7 @@ func (d *delegator) perform(ctx context.Context, a *arguments) (err error) {
 	default:
 		err = fmt.Errorf("unsupported value of type %T", selected)
 	}
-	return
+	return err
 }
 
 // A command performs a task.

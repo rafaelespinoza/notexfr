@@ -14,9 +14,9 @@ import (
 	"github.com/rafaelespinoza/notexfr/internal/repo/enex"
 )
 
-// FetchWriteOptions is a set of named arguments for fetching remote resources
+// FetchWriteParams is a set of named arguments for fetching remote resources
 // and/or writing results to a local file.
-type FetchWriteOptions struct {
+type FetchWriteParams struct {
 	InputFilename    string
 	OutputFilename   string
 	Timeout          time.Duration
@@ -26,7 +26,7 @@ type FetchWriteOptions struct {
 
 // FetchWriteNotebooks gets Notebooks from your Evernote account and writes the
 // results to a local JSON file.
-func FetchWriteNotebooks(ctx context.Context, opts *FetchWriteOptions) (err error) {
+func FetchWriteNotebooks(ctx context.Context, opts *FetchWriteParams) (err error) {
 	var repository entity.LocalRemoteRepo
 	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 	defer cancel()
@@ -39,7 +39,7 @@ func FetchWriteNotebooks(ctx context.Context, opts *FetchWriteOptions) (err erro
 
 // FetchWriteTags gets Tags from your Evernote account and writes the results
 // to a local JSON file.
-func FetchWriteTags(ctx context.Context, opts *FetchWriteOptions) (err error) {
+func FetchWriteTags(ctx context.Context, opts *FetchWriteParams) (err error) {
 	var repository entity.LocalRemoteRepo
 	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 	defer cancel()
@@ -52,7 +52,7 @@ func FetchWriteTags(ctx context.Context, opts *FetchWriteOptions) (err error) {
 
 // FetchWriteNotes gets Notes from your Evernote account and writes the results
 // to a local JSON file.
-func FetchWriteNotes(ctx context.Context, opts *FetchWriteOptions) (err error) {
+func FetchWriteNotes(ctx context.Context, opts *FetchWriteParams) (err error) {
 	var repository entity.LocalRemoteRepo
 	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 	defer cancel()
@@ -64,7 +64,7 @@ func FetchWriteNotes(ctx context.Context, opts *FetchWriteOptions) (err error) {
 }
 
 // WriteENEXToJSON converts an Evernote export file to JSON.
-func WriteENEXToJSON(ctx context.Context, opts *FetchWriteOptions) (err error) {
+func WriteENEXToJSON(ctx context.Context, opts *FetchWriteParams) (err error) {
 	var repository entity.RepoLocal
 	var resources []entity.LinkID
 	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
@@ -79,7 +79,7 @@ func WriteENEXToJSON(ctx context.Context, opts *FetchWriteOptions) (err error) {
 	return
 }
 
-func fetchWriteResource(ctx context.Context, repository entity.LocalRemoteRepo, opts *FetchWriteOptions, name string) (err error) {
+func fetchWriteResource(ctx context.Context, repository entity.LocalRemoteRepo, opts *FetchWriteParams, name string) (err error) {
 	var resources []entity.LinkID
 	if resources, err = fetchResources(ctx, repository, opts, name); err != nil {
 		return
@@ -88,7 +88,7 @@ func fetchWriteResource(ctx context.Context, repository entity.LocalRemoteRepo, 
 	return
 }
 
-func fetchResources(ctx context.Context, repository entity.LocalRemoteRepo, opts *FetchWriteOptions, name string) (resources []entity.LinkID, err error) {
+func fetchResources(ctx context.Context, repository entity.LocalRemoteRepo, opts *FetchWriteParams, name string) (resources []entity.LinkID, err error) {
 	if resources, err = repo.FetchResources(ctx, repository); err != nil {
 		return
 	}

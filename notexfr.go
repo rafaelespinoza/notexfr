@@ -1,5 +1,5 @@
-// The notexfr command provides a CLI for various metadata management operations in
-// StandardNotes.
+// The notexfr command provides a CLI for various data management operations for
+// note-taking services.
 package main
 
 import (
@@ -13,6 +13,7 @@ import (
 func init() {
 	cmd.Init()
 }
+
 func main() {
 	if err := cmd.Run(context.Background()); err != nil {
 		fmt.Println(err)

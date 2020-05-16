@@ -12,7 +12,7 @@ import (
 )
 
 var _Enex = func(cmdName string) *delegator {
-	cmd := &delegator{description: "do enex stuff"}
+	cmd := &delegator{description: "handle Evernote data via ENEX (Evernote export) files"}
 	const helpLink = "https://help.evernote.com/hc/en-us/articles/209005557"
 
 	// Define this field before defining the Usage function so the subcommand
@@ -23,7 +23,7 @@ var _Enex = func(cmdName string) *delegator {
 			setup: func(a *arguments) *flag.FlagSet {
 				subcmdName := cmdName + " to-json"
 				flags := flag.NewFlagSet(subcmdName, flag.ExitOnError)
-				var opts interactor.FetchWriteOptions
+				var opts interactor.FetchWriteParams
 				flags.StringVar(
 					&opts.InputFilename,
 					"input",
@@ -99,44 +99,6 @@ var _Enex = func(cmdName string) *delegator {
 					context.TODO(),
 					a.enexExportOpts,
 				)
-			},
-		},
-		"to-sn": &command{
-			description: "convert ENEX file to StandardNotes format",
-			setup: func(a *arguments) *flag.FlagSet {
-				subcmdName := cmdName + " to-sn"
-				var opts interactor.ConvertOptions
-				flags := flag.NewFlagSet(subcmdName, flag.ExitOnError)
-				flags.StringVar(
-					&opts.InputFilename,
-					"input",
-					"",
-					"path to evernote export file",
-				)
-				flags.StringVar(
-					&opts.OutputFilename,
-					"output",
-					"",
-					"path to output file",
-				)
-				flags.Usage = func() {
-					fmt.Printf(`Usage: %s %s
-
-	Parse, read an Evernote ENEX file, convert to StandardNotes JSON format.`,
-						_Bin, subcmdName)
-
-					fmt.Printf("\n\nFlags:\n\n")
-					flags.PrintDefaults()
-				}
-				a.convertOpts = &opts
-				return flags
-			},
-			run: func(ctx context.Context, a *arguments) error {
-				_, err := interactor.ConvertENEXToStandardNotes(
-					context.Background(),
-					*a.convertOpts,
-				)
-				return err
 			},
 		},
 	}
