@@ -17,7 +17,6 @@ type BackfillParams struct {
 	EvernoteFilenames     struct{ Notebooks, Notes, Tags string }
 	StandardNotesFilename string
 	OutputFilenames       struct{ Notebooks, Notes, Tags string }
-	Verbose               bool
 }
 
 func BackfillSN(ctx context.Context, opts *BackfillParams) (out []entity.LinkID, err error) {
@@ -92,7 +91,7 @@ func BackfillSN(ctx context.Context, opts *BackfillParams) (out []entity.LinkID,
 	if err != nil {
 		return
 	}
-	if err = writeResources(notes, opts.OutputFilenames.Notes, opts.Verbose, "backfilled notes"); err != nil {
+	if err = writeResources(notes, opts.OutputFilenames.Notes, true, "backfilled notes"); err != nil {
 		return
 	}
 	out = notes

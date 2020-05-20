@@ -58,7 +58,7 @@ func ConvertEDAMToStandardNotes(ctx context.Context, opts ConvertParams) (out *S
 	err = writeResources(
 		out,
 		opts.OutputFilename,
-		false,
+		true,
 		"standardnotes resources",
 	)
 	return

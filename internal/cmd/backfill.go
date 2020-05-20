@@ -25,7 +25,6 @@ var _Backfill = func(cmdName string) *delegator {
 				flags.StringVar(&opts.OutputFilenames.Notebooks, "output-notebooks", "", "write notebooks json to this file")
 				flags.StringVar(&opts.OutputFilenames.Notes, "output-notes", "", "write notes json to this file")
 				flags.StringVar(&opts.OutputFilenames.Tags, "output-tags", "", "write tags json to this file")
-				flags.BoolVar(&opts.Verbose, "verbose", false, "output stuff as it happens")
 				flags.Usage = func() {
 					fmt.Printf(`Usage: %s %s
 

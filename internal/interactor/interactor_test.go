@@ -472,7 +472,6 @@ func TestBackfill(t *testing.T) {
 				OutputFilenames: struct{ Notebooks, Notes, Tags string }{
 					Notes: pathToTestDir + "/all_the_things.json",
 				},
-				Verbose: false,
 			},
 		)
 		if err != nil {
