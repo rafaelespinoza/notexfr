@@ -117,12 +117,28 @@ notexfr convert edam-to-sn \
 
 _Do this if you want to do update existing StandardNotes data_.
 
+The `--input-sn` value would a representation of your data in StandardNotes. For
+example, it could be the output of https://dashboard.standardnotes.org/tools.
+
 ```sh
 notexfr backfill en-to-sn \
   --input-en-notebooks path/to/en_notebooks.json \
   --input-en-notes path/to/en_notes.json \
   --input-en-tags path/to/en_tags.json \
+  --input-sn path/to/evernote-to-sn.txt \
   --output-notebooks path/to/sn_notebooks.json \
   --output-notes path/to/sn_notes.json \
   --output-tags path/to/sn_tags.json
+```
+
+## Development
+
+Use `make` to perform common tasks.
+
+```sh
+# output binaries
+make build
+
+# remove binaries
+make clean
 ```

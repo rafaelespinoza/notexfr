@@ -42,6 +42,7 @@ func Init() {
 			"convert":  _Convert,
 			"edam":     _Edam,
 			"enex":     _Enex,
+			"version":  _Version,
 		},
 	}
 
@@ -90,10 +91,14 @@ func Run(ctx context.Context) (err error) {
 	if err != nil {
 		return
 	}
+
+	if _, ok := deleg.(*command); ok {
+		return deleg.perform(ctx, &_Args)
+	}
+
 	// a panic is possible here, but all direct children of the main command
 	// are delegators so it's not designed to happen.
 	topic := deleg.(*delegator)
-
 	if err = topic.perform(ctx, &_Args); err != nil {
 		topic.flags.Usage()
 		return
