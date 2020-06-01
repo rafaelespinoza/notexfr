@@ -23,3 +23,6 @@ build:
 
 clean:
 	rm -frv $(BIN_DIR)
+
+testall:
+	$(GO) test ./... $(ARGS)

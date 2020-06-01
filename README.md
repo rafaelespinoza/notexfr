@@ -6,6 +6,8 @@
 /_/ /_/ \____/ \__/ \___//_/|_|/_/  /_/
 ```
 
+[![](https://github.com/rafaelespinoza/notexfr/workflows/build/badge.svg)](https://github.com/rafaelespinoza/notexfr/actions)
+
 `notexfr` is a tool to convert and adapt data for transfer between note-taking services.
 
 #### What are the features?
@@ -141,4 +143,16 @@ make build
 
 # remove binaries
 make clean
+
+# run all tests
+make testall
+# run all tests with some flags
+make testall ARGS='-v -count=1 -failfast'
+```
+
+By default, the first `go` in your PATH is used. You could specify another
+golang version by setting the `GO` env var while invoking `make`. Example:
+
+```sh
+GO=/path/to/go1.x.y/bin/go make build
 ```

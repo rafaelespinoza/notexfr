@@ -1,0 +1,22 @@
+name: build
+on: [push, pull_request]
+env:
+  GO111MODULE: on
+jobs:
+  all:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup go
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.14
+    - name: Checkout repo
+      uses: actions/checkout@v1
+    - name: Get dependencies
+      run: |
+        go mod download
+        go mod verify
+    - name: Build code
+      run: make build
+    - name: Test code
+      run: make testall ARGS='-v'
