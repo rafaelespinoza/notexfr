@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/rafaelespinoza/notexfr/internal/entity"
@@ -22,10 +23,10 @@ func ReadConversionFile(filename string) (notes, tags []entity.LinkID, err error
 		decoder   *json.Decoder
 		metadatas struct{ Items []convfileItem }
 	)
-	if file, err = os.Open(filename); err != nil {
+	if file, err = os.Open(filepath.Clean(filename)); err != nil {
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	decoder = json.NewDecoder(file)
 	if err = decoder.Decode(&metadatas); err != nil {
 		return

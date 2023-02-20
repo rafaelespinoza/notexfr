@@ -43,7 +43,7 @@ func ConvertEDAMToStandardNotes(ctx context.Context, opts ConvertParams) (out *S
 
 	var combinedEnexResources []entity.LinkID
 	for _, source := range []keyedItems{evernote.notes, evernote.tags, evernote.notebooks} {
-		source.each(func(item entity.LinkID) error {
+		_ = source.each(func(item entity.LinkID) error {
 			combinedEnexResources = append(combinedEnexResources, item)
 			return nil
 		})

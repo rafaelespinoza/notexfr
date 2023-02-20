@@ -3,6 +3,7 @@ package edam_test
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -480,10 +481,10 @@ func TestTags(t *testing.T) {
 
 func readLocalFile(repository entity.RepoLocal, filename string) (out []entity.LinkID, err error) {
 	var file *os.File
-	if file, err = os.Open(filename); err != nil {
+	if file, err = os.Open(filepath.Clean(filename)); err != nil {
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	out, err = repository.ReadLocal(context.TODO(), file)
 	return
 }

@@ -26,7 +26,10 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	os.MkdirAll(_BaseTestOutputDir, 0755)
+	if err := os.MkdirAll(_BaseTestOutputDir, 0700); err != nil {
+		panic(err)
+	}
+
 	m.Run()
 }
 
@@ -49,7 +52,7 @@ func TestInterfaceImplementations(t *testing.T) {
 
 func TestConvert(t *testing.T) {
 	pathToTestDir := _BaseTestOutputDir + "/" + t.Name()
-	if err := os.MkdirAll(pathToTestDir, 0755); err != nil {
+	if err := os.MkdirAll(pathToTestDir, 0700); err != nil {
 		t.Fatal(err)
 	}
 
@@ -439,7 +442,7 @@ var uuidMatcher = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]
 
 func TestBackfill(t *testing.T) {
 	pathToTestDir := _BaseTestOutputDir + "/" + t.Name()
-	if err := os.MkdirAll(pathToTestDir, 0755); err != nil {
+	if err := os.MkdirAll(pathToTestDir, 0700); err != nil {
 		t.Fatal(err)
 	}
 	// expectedTestValues is a set of expected outputs for one test case.

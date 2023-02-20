@@ -23,7 +23,10 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	os.MkdirAll(_BaseTestOutputDir, 0755)
+	if err := os.MkdirAll(_BaseTestOutputDir, 0700); err != nil {
+		panic(err)
+	}
+
 	m.Run()
 }
 

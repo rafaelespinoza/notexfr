@@ -1,4 +1,5 @@
 GO ?= go
+GOSEC ?= gosec
 
 PKG_IMPORT_PATH=github.com/rafaelespinoza/notexfr
 BIN_DIR=./bin
@@ -26,6 +27,14 @@ build:
 
 deps:
 	$(GO) mod tidy && $(GO) mod vendor
+
+# Run a security scanner over the source code. This Makefile won't install the
+# scanner binary for you, so check out the gosec README for instructions:
+# https://github.com/securego/gosec
+#
+# If necessary, specify the path to the built binary with the GOSEC env var.
+gosec:
+	$(GOSEC) $(FLAGS) $(SRC_PATHS)
 
 # Specify packages to test with P variable. Example:
 # make test P='entity repo'

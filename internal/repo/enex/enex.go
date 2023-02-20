@@ -37,7 +37,8 @@ func (f *File) ReadLocal(ctx context.Context, r io.Reader) (out []entity.LinkID,
 	}
 
 	resources := make([]entity.LinkID, len(parsed.Notes))
-	for i, enexNote := range parsed.Notes {
+	for i := range parsed.Notes {
+		enexNote := parsed.Notes[i]
 		if note, err = newNoteFromEnex(&enexNote); err != nil {
 			return
 		}

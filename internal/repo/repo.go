@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/rafaelespinoza/notexfr/internal/entity"
 )
@@ -23,10 +24,10 @@ func FetchResources(ctx context.Context, repository entity.RepoRemote) (resource
 func ReadLocalFile(ctx context.Context, repository entity.RepoLocal, filename string) ([]entity.LinkID, error) {
 	var file *os.File
 	var err error
-	if file, err = os.Open(filename); err != nil {
+	if file, err = os.Open(filepath.Clean(filename)); err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	return repository.ReadLocal(ctx, file)
 }
 
