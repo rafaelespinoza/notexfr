@@ -7,5 +7,5 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/joho/godotenv v1.3.0
 	github.com/macrat/go-enex v0.0.0-20190325124011-11ac7b8c8c4c
-	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5
+	golang.org/x/net v0.7.0
 )
