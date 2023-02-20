@@ -33,7 +33,8 @@ and their Note associations.
 ## Getting Started
 
 ```
-go get github.com/rafaelespinoza/notexfr
+make build
+mv -iv bin/notexfr $GOPATH/bin
 ```
 
 **TLDR**:
@@ -137,17 +138,22 @@ notexfr backfill en-to-sn \
 
 Use `make` to perform common tasks.
 
+Output a binary
 ```sh
-# output binaries
 make build
+```
 
-# remove binaries
-make clean
+Run tests
+```sh
+make test
 
-# run all tests
-make testall
-# run all tests with some flags
-make testall ARGS='-v -count=1 -failfast'
+# run tests with some flags
+make test FLAGS='-v -count=1 -failfast'
+```
+
+Do static checks
+```sh
+make vet
 ```
 
 By default, the first `go` in your PATH is used. You could specify another
