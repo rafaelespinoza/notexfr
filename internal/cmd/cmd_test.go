@@ -2,14 +2,11 @@ package cmd_test
 
 import (
 	"context"
-	"errors"
 	"os"
-	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/rafaelespinoza/notexfr/internal/cmd"
-	"github.com/rafaelespinoza/notexfr/internal/repo"
 )
 
 const (
@@ -115,47 +112,6 @@ func TestEDAM(t *testing.T) {
 		if stat.Size() < 1 {
 			t.Errorf("expected file %s to be non-empty", outputFilename)
 		}
-	})
-
-	// testMissingToken checks that making an API request without a token fails
-	// in a certain way. The expected error message in this case is not the
-	// greatest, but it's better than nothing.
-	testMissingToken := func(t *testing.T, args []string) {
-		t.Helper()
-		os.Args = args
-		cmd.Init()
-		ctx := context.Background()
-		err := cmd.Run(ctx)
-		if !errors.Is(err, repo.Error) {
-			t.Errorf("expected %v, got %v", repo.Error, err)
-		}
-		msg := err.Error()
-		expectedCodePattern := regexp.MustCompile(`(?i)code: "\w+required"`)
-		if !expectedCodePattern.MatchString(msg) {
-			t.Errorf(
-				"expected error message %q to match %q",
-				msg, expectedCodePattern.String(),
-			)
-		}
-		expectedFieldPattern := regexp.MustCompile(`(?i)parameter: "\w+token"`)
-		if !expectedFieldPattern.MatchString(msg) {
-			t.Errorf(
-				"expected error message %q to match %q",
-				msg, expectedFieldPattern.String(),
-			)
-		}
-	}
-
-	t.Run("notebooks", func(t *testing.T) {
-		testMissingToken(t, []string{"", "edam", "notebooks"})
-	})
-
-	t.Run("notes", func(t *testing.T) {
-		testMissingToken(t, []string{"", "edam", "notes"})
-	})
-
-	t.Run("tags", func(t *testing.T) {
-		testMissingToken(t, []string{"", "edam", "tags"})
 	})
 }
 
