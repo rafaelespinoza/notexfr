@@ -60,24 +60,30 @@ var _Edam = func(cmdName string) *delegator {
 			setup: func(a *arguments) *flag.FlagSet {
 				flags := setupFetchWriteCommands(a, "notes")
 				var listParams edam.NotesRemoteQueryParams
+				var loIndex, hiIndex, pageSize int
 				flags.IntVar(
-					&listParams.LoIndex,
+					&loIndex,
 					"lo-index",
 					0,
 					"start index for paginating notes",
 				)
 				flags.IntVar(
-					&listParams.HiIndex,
+					&hiIndex,
 					"hi-index",
 					-1,
 					"end index for paginating notes. if negative, go until there are no more.",
 				)
 				flags.IntVar(
-					&listParams.PageSize,
+					&pageSize,
 					"page-size",
 					100,
 					"number of results to fetch at once",
 				)
+				// TODO: validate that each of these int variables can fit into
+				// an int32 without overflowing
+				listParams.LoIndex = int32(loIndex)
+				listParams.HiIndex = int32(hiIndex)
+				listParams.PageSize = int32(pageSize)
 				a.fetchWriteOpts.NotesQueryParams = &listParams
 				return flags
 			},

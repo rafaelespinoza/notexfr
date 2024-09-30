@@ -39,8 +39,8 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error
 		return
 	}
 	filter := n.rqp.toFilter()
-	pageSize := int32(n.rqp.PageSize)
-	pagination := newPaginator(int32(n.rqp.LoIndex), int32(n.rqp.HiIndex))
+	pageSize := n.rqp.PageSize
+	pagination := newPaginator(n.rqp.LoIndex, n.rqp.HiIndex)
 
 	yes := true
 	// resultSpec tells evernote which fields to include in the search. By
@@ -126,9 +126,9 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error
 
 // NotesRemoteQueryParams is a set of named options for listing Evernote notes.
 type NotesRemoteQueryParams struct {
-	LoIndex    int
-	HiIndex    int
-	PageSize   int
+	LoIndex    int32
+	HiIndex    int32
+	PageSize   int32
 	TagIDs     []string
 	NotebookID string
 	Verbose    bool
