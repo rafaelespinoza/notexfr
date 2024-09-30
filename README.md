@@ -32,9 +32,11 @@ and their Note associations.
 
 ## Getting Started
 
-```
-make build
-mv -iv bin/notexfr $GOPATH/bin
+Many common tasks in this repo use [just](https://just.systems/).
+
+```sh
+$ just build
+$ mv -iv bin/notexfr $GOPATH/bin
 ```
 
 **TLDR**:
@@ -62,8 +64,8 @@ You must specify a path to an environment variable file. _The information in
 there will be equivalent to your username and password_.
 
 ```
-notexfr edam make-env --envfile path/to/envfile
-chmod 600 path/to/envfile
+$ notexfr edam make-env --envfile path/to/envfile
+$ chmod 600 path/to/envfile
 ```
 
 ### Fetch Evernote data, write to local files
@@ -72,13 +74,13 @@ By default, everything is fetched using your sandbox account. Use the
 `--production` flag to fetch data from your production Evernote account.
 Remember to specify the path to the environment variable file.
 
-```bash
-notexfr edam notebooks \
+```sh
+$ notexfr edam notebooks \
   --production \
   --output path/to/en_notebooks.json \
   --envfile path/to/envfile
 
-notexfr edam tags \
+$ notexfr edam tags \
   --production \
   --output path/to/en_tags.json \
   --envfile path/to/envfile
@@ -90,7 +92,7 @@ will vary. To be safe, set it on the higher end. Add the `verbose` flag for
 updates.
 
 ```sh
-notexfr edam notes \
+$ notexfr edam notes \
   --production \
   --output path/to/en_notes.json \
   --envfile path/to/envfile \
@@ -109,7 +111,7 @@ _Do this if you want to do a full conversion of Evernote data and create new
 StandardNotes data_.
 
 ```sh
-notexfr convert edam-to-sn \
+$ notexfr convert edam-to-sn \
   --input-en-notebooks path/to/en_notebooks.json \
   --input-en-notes path/to/en_notes.json \
   --input-en-tags path/to/en_tags.json \
@@ -124,7 +126,7 @@ The `--input-sn` value would a representation of your data in StandardNotes. For
 example, it could be the output of https://dashboard.standardnotes.org/tools.
 
 ```sh
-notexfr backfill en-to-sn \
+$ notexfr backfill en-to-sn \
   --input-en-notebooks path/to/en_notebooks.json \
   --input-en-notes path/to/en_notes.json \
   --input-en-tags path/to/en_tags.json \
@@ -136,29 +138,35 @@ notexfr backfill en-to-sn \
 
 ## Development
 
-Use `make` to perform common tasks.
+Use `just` to perform common tasks.
 
 Output a binary
 ```sh
-make build
+$ just build
 ```
 
 Run tests
 ```sh
-make test
+$ just test
 
 # run tests with some flags
-make test FLAGS='-v -count=1 -failfast'
+$ just test -v -count=1 -failfast
+
+# run tests on select package paths, override the Justfile variable PKG_PATH
+$ just PKG_PATH=./foo/bar/... test
+
+# select package path, specify some test flags
+$ just PKG_PATH=./foo/bar/... test -v -race
 ```
 
 Do static checks
 ```sh
-make vet
+$ just vet
 ```
 
 By default, the first `go` in your PATH is used. You could specify another
-golang version by setting the `GO` env var while invoking `make`. Example:
+golang version by setting the `GO` variable `just`. Example:
 
 ```sh
-GO=/path/to/go1.x.y/bin/go make build
+$ just GO=/path/to/go1.x.y/bin/go build
 ```
