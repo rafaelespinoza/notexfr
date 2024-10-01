@@ -10,12 +10,9 @@ import (
 	"github.com/rafaelespinoza/notexfr/internal/cmd"
 )
 
-func init() {
-	cmd.Init()
-}
-
 func main() {
-	if err := cmd.Run(context.Background()); err != nil {
+	err := cmd.New().ExecuteContext(context.Background())
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

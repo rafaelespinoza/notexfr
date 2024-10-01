@@ -32,8 +32,8 @@ func TestBackfill(t *testing.T) {
 		outputNotebooks := makeOutputFilenamePrefix(t) + "-notebooks.json"
 		outputNotes := makeOutputFilenamePrefix(t) + "-notes.json"
 		outputTags := makeOutputFilenamePrefix(t) + "-tags.json"
-		os.Args = []string{
-			"", "backfill", "en-to-sn",
+		args := []string{
+			"backfill", "en-to-sn",
 			"--input-en-notebooks", _FixturesDir + "/" + _StubNotebooksFile,
 			"--input-en-notes", _FixturesDir + "/" + _StubNotesFile,
 			"--input-en-tags", _FixturesDir + "/" + _StubTagsFile,
@@ -42,12 +42,7 @@ func TestBackfill(t *testing.T) {
 			"--output-notes", outputNotes,
 			"--output-tags", outputTags,
 		}
-		cmd.Init()
-		ctx := context.Background()
-		err := cmd.Run(ctx)
-		if err != nil {
-			t.Fatal(err)
-		}
+		runOrDie(t, args)
 		t.Logf("check outputs at %q", outputNotebooks)
 		t.Logf("check outputs at %q", outputNotes)
 		t.Logf("check outputs at %q", outputTags)
@@ -57,35 +52,25 @@ func TestBackfill(t *testing.T) {
 func TestConvert(t *testing.T) {
 	t.Run("edam-to-sn", func(t *testing.T) {
 		outputFilename := makeOutputFilenamePrefix(t) + "-output.json"
-		os.Args = []string{
-			"", "convert", "edam-to-sn",
+		args := []string{
+			"convert", "edam-to-sn",
 			"--input-en-notebooks", _FixturesDir + "/" + _StubNotebooksFile,
 			"--input-en-notes", _FixturesDir + "/" + _StubNotesFile,
 			"--input-en-tags", _FixturesDir + "/" + _StubTagsFile,
 			"--output", outputFilename,
 		}
-		cmd.Init()
-		ctx := context.Background()
-		err := cmd.Run(ctx)
-		if err != nil {
-			t.Fatal(err)
-		}
+		runOrDie(t, args)
 		t.Logf("check output at %q", outputFilename)
 	})
 
 	t.Run("enex-to-sn", func(t *testing.T) {
 		outputFilename := makeOutputFilenamePrefix(t) + "-output.json"
-		os.Args = []string{
-			"", "convert", "enex-to-sn",
+		args := []string{
+			"convert", "enex-to-sn",
 			"--input", _FixturesDir + "/" + _StubENEXFile,
 			"--output", outputFilename,
 		}
-		cmd.Init()
-		ctx := context.Background()
-		err := cmd.Run(ctx)
-		if err != nil {
-			t.Fatal(err)
-		}
+		runOrDie(t, args)
 		t.Logf("check output at %q", outputFilename)
 	})
 }
@@ -95,16 +80,11 @@ func TestEDAM(t *testing.T) {
 		outputFilename := makeOutputFilenamePrefix(t) + "-envfile"
 		defer os.Remove(outputFilename)
 
-		os.Args = []string{
-			"", "edam", "make-env",
-			"-envfile", outputFilename,
+		args := []string{
+			"edam", "make-env",
+			"--envfile", outputFilename,
 		}
-		cmd.Init()
-		ctx := context.Background()
-		err := cmd.Run(ctx)
-		if err != nil {
-			t.Fatal(err)
-		}
+		runOrDie(t, args)
 		stat, err := os.Stat(outputFilename)
 		if err != nil {
 			t.Fatal(err)
@@ -117,56 +97,48 @@ func TestEDAM(t *testing.T) {
 
 func TestENEX(t *testing.T) {
 	t.Run("inspect", func(t *testing.T) {
-		os.Args = []string{
-			"", "enex", "inspect",
+		args := []string{
+			"enex", "inspect",
 			"--input", _FixturesDir + "/" + _StubENEXFile,
 		}
-		cmd.Init()
-		ctx := context.Background()
-		err := cmd.Run(ctx)
-		if err != nil {
-			t.Fatal(err)
-		}
+		runOrDie(t, args)
 
-		os.Args = []string{
-			"", "enex", "inspect",
+		args = []string{
+			"enex", "inspect",
 			"--input", _FixturesDir + "/" + _StubENEXFile,
 			"--pretty",
 		}
-		cmd.Init()
-		err = cmd.Run(ctx)
-		if err != nil {
-			t.Fatal(err)
-		}
+		runOrDie(t, args)
 	})
 
 	t.Run("to-json", func(t *testing.T) {
 		outputFilename := makeOutputFilenamePrefix(t) + "-output.json"
-		os.Args = []string{
-			"", "enex", "to-json",
+		args := []string{
+			"enex", "to-json",
 			"--input", _FixturesDir + "/" + _StubENEXFile,
 			"--output", outputFilename,
 		}
-		cmd.Init()
-		ctx := context.Background()
-		err := cmd.Run(ctx)
-		if err != nil {
-			t.Fatal(err)
-		}
+		runOrDie(t, args)
 		t.Logf("check output at %q", outputFilename)
 	})
 }
 
 func TestVersion(t *testing.T) {
-	os.Args = []string{"", "version"}
-	cmd.Init()
-	ctx := context.Background()
-	err := cmd.Run(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
+	runOrDie(t, []string{"version"})
 }
 
 func makeOutputFilenamePrefix(t *testing.T) string {
 	return _BaseTestOutputDir + "/" + strings.Replace(t.Name(), "/", "_", -1)
+}
+
+func runOrDie(t *testing.T, args []string) {
+	t.Helper()
+
+	root := cmd.New()
+	os.Args = append([]string{""}, args...)
+
+	err := root.ExecuteContext(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
 }

@@ -2,186 +2,177 @@ package cmd
 
 import (
 	"context"
-	"flag"
 	"fmt"
-	"strings"
 	"time"
+
+	"github.com/spf13/cobra"
 
 	"github.com/rafaelespinoza/notexfr/internal/interactor"
 	"github.com/rafaelespinoza/notexfr/internal/repo/edam"
 )
 
-var _Edam = func(cmdName string) *delegator {
-	cmd := &delegator{description: "handle Evernote data from the EDAM API"}
+func makeEdam(cmdName string) *cobra.Command {
+	cmd := cobra.Command{
+		Use:     cmdName,
+		GroupID: dataGroupID,
+		Short:   "handle Evernote data from the EDAM API",
+		Long: `Interacts with Evernote via its API.
 
-	// Define this field before defining the Usage function so the subcommand
-	// descriptions are present in the help message.
-	cmd.subs = map[string]directive{
-		"make-env": &command{
-			description: "init an env var file unless it already exists",
-			setup: func(a *arguments) *flag.FlagSet {
-				const name = "make-env"
-				flags := flag.NewFlagSet(name, flag.ExitOnError)
-				flags.StringVar(
-					&a.envfile,
-					"envfile",
-					"",
-					"path to env var file",
-				)
-				flags.Usage = func() {
-					fmt.Printf(`Usage: %s edam %s
+Handles fetching resources from the Evernote API (EDAM) and writes the
+results to local JSON files. A developer token is required to access your
+Evernote account.
 
-	Create an environment variable file to store Evernote sandbox and production
-	credentials.`,
-						_Bin, name)
-					fmt.Printf("\n\nFlags:\n\n")
-					flags.PrintDefaults()
-				}
-				return flags
-			},
-			run: func(ctx context.Context, a *arguments) error {
-				return interactor.MakeEDAMEnvFile(a.envfile)
-			},
-		},
-		"notebooks": &command{
-			description: "fetch Notebooks and write data to JSON file",
-			setup: func(a *arguments) *flag.FlagSet {
-				return setupFetchWriteCommands(a, "notebooks")
-			},
-			run: func(ctx context.Context, a *arguments) error {
-				return interactor.FetchWriteNotebooks(
-					newEdamContext(ctx, a.envfile, a.production),
-					a.fetchWriteOpts,
-				)
-			},
-		},
-		"notes": &command{
-			description: "fetch Notes and write data to JSON file",
-			setup: func(a *arguments) *flag.FlagSet {
-				flags := setupFetchWriteCommands(a, "notes")
-				var listParams edam.NotesRemoteQueryParams
-				var loIndex, hiIndex, pageSize int
-				flags.IntVar(
-					&loIndex,
-					"lo-index",
-					0,
-					"start index for paginating notes",
-				)
-				flags.IntVar(
-					&hiIndex,
-					"hi-index",
-					-1,
-					"end index for paginating notes. if negative, go until there are no more.",
-				)
-				flags.IntVar(
-					&pageSize,
-					"page-size",
-					100,
-					"number of results to fetch at once",
-				)
-				// TODO: validate that each of these int variables can fit into
-				// an int32 without overflowing
-				listParams.LoIndex = int32(loIndex)
-				listParams.HiIndex = int32(hiIndex)
-				listParams.PageSize = int32(pageSize)
-				a.fetchWriteOpts.NotesQueryParams = &listParams
-				return flags
-			},
-			run: func(ctx context.Context, a *arguments) error {
-				a.fetchWriteOpts.NotesQueryParams.Verbose = a.fetchWriteOpts.Verbose
-				return interactor.FetchWriteNotes(
-					newEdamContext(ctx, a.envfile, a.production),
-					a.fetchWriteOpts,
-				)
-			},
-		},
-		"tags": &command{
-			description: "fetch Tags and write data to JSON file",
-			setup: func(a *arguments) *flag.FlagSet {
-				return setupFetchWriteCommands(a, "tags")
-			},
-			run: func(ctx context.Context, a *arguments) error {
-				return interactor.FetchWriteTags(
-					newEdamContext(ctx, a.envfile, a.production),
-					a.fetchWriteOpts,
-				)
-			},
-		},
+See the developer guide to get started: https://dev.evernote.com/doc/
+
+Specify account credentials in a file with the --envfile flag.
+Use the --production flag to use production credentials, otherwise it will
+default to using sandbox credentials.`,
 	}
 
-	descriptions := describeSubcommands(cmd.subs)
-	cmd.flags = flag.NewFlagSet(cmdName, flag.ExitOnError)
-	cmd.flags.Usage = func() {
-		mainsubName := _Bin + " " + cmdName
-		fmt.Printf(`Usage: %s
-
-Description:
-
-	%s interacts with Evernote.
-	It handles fetching resources from the Evernote API (EDAM) and writes the
-	results to local JSON files. A developer token is required to access your
-	Evernote account.
-
-	See the developer guide to get started:
-	%s
-
-	Specify account credentials in a file with the -envfile flag.
-	Use the -production flag to use production credentials, otherwise it will
-	default to using sandbox credentials.
-
-Subcommands:
-
-	These will have their own set of flags. Put them after the subcommand.
-
-	%v
-`, mainsubName, mainsubName, "https://dev.evernote.com/doc/", strings.Join(descriptions, "\n\t"),
-		)
+	makeEnv := cobra.Command{
+		Use:   "make-env",
+		Short: "init an env var file unless it already exists",
+		Long:  `Create an environment variable file to store Evernote sandbox and production credentials`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			flags := cmd.Flags()
+			envfile, err := flags.GetString("envfile")
+			if err != nil {
+				return err
+			}
+			return interactor.MakeEDAMEnvFile(envfile)
+		},
 	}
-	return cmd
-}("edam")
-
-func setupFetchWriteCommands(a *arguments, name string) *flag.FlagSet {
-	var opts interactor.FetchWriteParams
-	flags := flag.NewFlagSet(name, flag.ExitOnError)
-	flags.StringVar(
-		&opts.OutputFilename,
-		"output",
-		"",
-		"path to write data as JSON",
-	)
-	flags.DurationVar(
-		&opts.Timeout,
-		"timeout",
-		time.Duration(120)*time.Second,
-		"how long to wait before timing out",
-	)
-	flags.BoolVar(&opts.Verbose, "verbose", false, "output stuff as it happens")
-	flags.BoolVar(&_Args.production, "production", false, "use production evernote account")
-	flags.StringVar(&_Args.envfile, "envfile", "", "path to to env var file")
-	a.fetchWriteOpts = &opts
-	flags.Usage = func() {
-		fmt.Printf(`Usage: %s edam %s
-
-	Fetch %s from your Evernote account and write them to JSON files.
-	Use your sandbox account by default. To use your production account, pass
-	the -production flag.
-	Specify account credentials with the -envfile flag.`,
-			_Bin, name, name)
-
-		fmt.Printf("\n\nFlags:\n\n")
-		flags.PrintDefaults()
+	{
+		makeEnv.Flags().StringP("envfile", "e", "", "path to env var file")
 	}
-	return flags
+
+	notebooks := cobra.Command{
+		Use:   "notebooks",
+		Short: "fetch Notebooks and write data to JSON file",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx, err := newEDAMCtx(cmd)
+			if err != nil {
+				return err
+			}
+			opts, err := buildEDAMFetchWriteParams(cmd)
+			if err != nil {
+				return err
+			}
+			return interactor.FetchWriteNotebooks(ctx, &opts)
+		},
+	}
+	setupEDAMSubcmd(&notebooks)
+
+	notes := cobra.Command{
+		Use:   "notes",
+		Short: "fetch Notes and write data to JSON file",
+	}
+	setupEDAMSubcmd(&notes)
+	{
+		notesFlags := notes.Flags()
+		notesFlags.Int32P("lo-index", "l", 0, "start index for paginating notes")
+		notesFlags.Int32P("hi-index", "h", -1, "end index for paginating notes, if negative go until there are no more")
+		notesFlags.Int32P("page-size", "s", 100, "number of results to fetch at once")
+
+		notes.RunE = func(cmd *cobra.Command, args []string) error {
+			ctx, err := newEDAMCtx(cmd)
+			if err != nil {
+				return err
+			}
+
+			opts, err := buildEDAMFetchWriteParams(cmd)
+			if err != nil {
+				return err
+			}
+			flags := cmd.Flags()
+			var rpq edam.NotesRemoteQueryParams
+			rpq.LoIndex, err = flags.GetInt32("lo-index")
+			if err != nil {
+				return err
+			}
+			rpq.HiIndex, err = flags.GetInt32("hi-index")
+			if err != nil {
+				return err
+			}
+			rpq.PageSize, err = flags.GetInt32("page-size")
+			if err != nil {
+				return err
+			}
+			opts.NotesQueryParams = &rpq
+			return interactor.FetchWriteNotes(ctx, &opts)
+		}
+	}
+
+	tags := cobra.Command{
+		Use:   "tags",
+		Short: "fetch Tags and write data to JSON file",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx, err := newEDAMCtx(cmd)
+			if err != nil {
+				return err
+			}
+
+			opts, err := buildEDAMFetchWriteParams(cmd)
+			if err != nil {
+				return err
+			}
+
+			return interactor.FetchWriteTags(ctx, &opts)
+		},
+	}
+	setupEDAMSubcmd(&tags)
+
+	cmd.AddCommand(&makeEnv, &notebooks, &notes, &tags)
+	return &cmd
 }
 
-func newEdamContext(parentCtx context.Context, envFile string, production bool) (ctx context.Context) {
+func setupEDAMSubcmd(cmd *cobra.Command) {
+	cmd.Long = fmt.Sprintf(`Fetch %s from your Evernote account and write them to JSON files.
+Use your sandbox account by default. To use your production account, pass
+the -production flag.
+Specify account credentials with the -envfile flag.`, cmd.Name())
+
+	flags := cmd.Flags()
+	flags.StringP("output", "o", "", "path to write data as JSON")
+	flags.DurationP("timeout", "t", time.Duration(120)*time.Second, "how long to wait before timing out")
+	flags.BoolP("verbose", "v", false, "output stuff as it happens")
+	flags.BoolP("production", "p", false, "use production evernote account")
+	flags.StringP("envfile", "e", "", "path to to env var file")
+}
+
+func newEDAMCtx(cmd *cobra.Command) (out context.Context, err error) {
+	flags := cmd.Flags()
+
+	envfile, err := flags.GetString("envfile")
+	if err != nil {
+		err = fmt.Errorf("failed to build EDAM context: %w", err)
+		return
+	}
+
 	var serviceEnvironment edam.EvernoteService
-	if production {
+	prod, err := flags.GetBool("production")
+	if err != nil {
+		err = fmt.Errorf("failed to build EDAM context: %w", err)
+		return
+	}
+	if prod {
 		serviceEnvironment = edam.EvernoteProductionService
 	}
-	ctx = context.WithValue(parentCtx, edam.EvernoteServiceKey, edam.CredentialsConfig{
-		EnvFilename: envFile,
-		ServiceEnv:  serviceEnvironment,
-	})
+
+	val := edam.CredentialsConfig{EnvFilename: envfile, ServiceEnv: serviceEnvironment}
+	out = context.WithValue(cmd.Context(), edam.EvernoteServiceKey, val)
+	return
+}
+
+func buildEDAMFetchWriteParams(cmd *cobra.Command) (out interactor.FetchWriteParams, err error) {
+	flags := cmd.Flags()
+	out.OutputFilename, err = flags.GetString("output")
+	if err != nil {
+		return
+	}
+	out.Timeout, err = flags.GetDuration("timeout")
+	if err != nil {
+		return
+	}
 	return
 }
