@@ -70,9 +70,9 @@ default to using sandbox credentials.`,
 	setupEDAMSubcmd(&notes)
 	{
 		notesFlags := notes.Flags()
-		notesFlags.Int32P("lo-index", "l", 0, "start index for paginating notes")
-		notesFlags.Int32P("hi-index", "h", -1, "end index for paginating notes, if negative go until there are no more")
-		notesFlags.Int32P("page-size", "s", 100, "number of results to fetch at once")
+		notesFlags.Int32P("lo-index", "L", 0, "start index for paginating notes")
+		notesFlags.Int32P("hi-index", "H", -1, "end index for paginating notes, if negative go until there are no more")
+		notesFlags.Int32P("page-size", "S", 100, "number of results to fetch at once")
 
 		notes.RunE = func(cmd *cobra.Command, args []string) error {
 			ctx, err := newEDAMCtx(cmd)
