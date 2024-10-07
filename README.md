@@ -88,8 +88,8 @@ $ notexfr edam tags \
 
 To get notes, you might consider a longer timeout value than the default.
 Anecdotally, it took about 90 seconds to download about 1550 notes. Your results
-will vary. To be safe, set it on the higher end. Add the `verbose` flag for
-updates.
+will vary. To be safe, set it on the higher end. Add the flag `--log-level=INFO`
+for updates.
 
 ```sh
 $ notexfr edam notes \
@@ -97,7 +97,7 @@ $ notexfr edam notes \
   --output path/to/en_notes.json \
   --envfile path/to/envfile \
   --timeout 120s \
-  --verbose
+  --log-level=INFO
 ```
 
 ### Convert or backfill StandardNotes data

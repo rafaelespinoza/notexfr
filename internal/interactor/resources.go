@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
 	"github.com/rafaelespinoza/notexfr/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/log"
 	"github.com/rafaelespinoza/notexfr/internal/repo"
 	"github.com/rafaelespinoza/notexfr/internal/repo/edam"
 	"github.com/rafaelespinoza/notexfr/internal/repo/enex"
@@ -20,7 +20,6 @@ type FetchWriteParams struct {
 	InputFilename    string
 	OutputFilename   string
 	Timeout          time.Duration
-	Verbose          bool
 	NotesQueryParams *edam.NotesRemoteQueryParams
 }
 
@@ -75,32 +74,30 @@ func WriteENEXToJSON(ctx context.Context, opts *FetchWriteParams) (err error) {
 	if resources, err = readLocalFile(ctx, repository, opts.InputFilename); err != nil {
 		return
 	}
-	err = writeResources(resources, opts.OutputFilename, opts.Verbose, "ENEX export items")
+	err = writeResources(resources, opts.OutputFilename, "ENEX export items")
 	return
 }
 
 func fetchWriteResource(ctx context.Context, repository entity.LocalRemoteRepo, opts *FetchWriteParams, name string) (err error) {
 	var resources []entity.LinkID
-	if resources, err = fetchResources(ctx, repository, opts, name); err != nil {
+	if resources, err = fetchResources(ctx, repository, name); err != nil {
 		return
 	}
-	err = writeResources(resources, opts.OutputFilename, opts.Verbose, name)
+	err = writeResources(resources, opts.OutputFilename, name)
 	return
 }
 
-func fetchResources(ctx context.Context, repository entity.LocalRemoteRepo, opts *FetchWriteParams, name string) (resources []entity.LinkID, err error) {
+func fetchResources(ctx context.Context, repository entity.LocalRemoteRepo, name string) (resources []entity.LinkID, err error) {
 	if resources, err = repo.FetchResources(ctx, repository); err != nil {
 		return
 	}
-	if opts.Verbose {
-		fmt.Printf("fetched %d %s\n", len(resources), name)
-	}
+	log.Info(ctx, map[string]any{"count": len(resources)}, "fetched "+name)
 	return
 }
 
 // writeResources marshalizes resources to JSON and writes to a local file. If
 // filename is empty, then it prints to standard output.
-func writeResources(resources interface{}, filename string, verbose bool, name string) (err error) {
+func writeResources(resources interface{}, filename string, name string) (err error) {
 	data, err := json.Marshal(resources)
 	if err != nil {
 		return
@@ -109,13 +106,11 @@ func writeResources(resources interface{}, filename string, verbose bool, name s
 		fmt.Println(string(data))
 		return
 	}
-	err = ioutil.WriteFile(filename, data, os.FileMode(0644))
+	err = os.WriteFile(filename, data, os.FileMode(0644))
 	if err != nil {
 		return
 	}
-	if verbose {
-		fmt.Printf("wrote %s to %q\n", name, filename)
-	}
+	log.Info(context.TODO(), map[string]any{"filename": filename, "resource_type": name}, "wrote JSON data to file")
 	return
 }
 
@@ -133,6 +128,7 @@ func MakeEDAMEnvFile(envfile string) (err error) {
 	if err = edam.MakeEnvFile(envfile); err != nil {
 		return
 	}
-	fmt.Printf("ok, wrote to %q\n", envfile)
+
+	log.Info(context.TODO(), map[string]any{"filename": envfile}, "wrote envfile")
 	return
 }

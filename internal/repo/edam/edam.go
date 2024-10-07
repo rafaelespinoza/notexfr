@@ -13,6 +13,7 @@ import (
 	"github.com/dreampuf/evernote-sdk-golang/edam"
 	"github.com/joho/godotenv"
 	"github.com/rafaelespinoza/notexfr/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/log"
 	"github.com/rafaelespinoza/notexfr/internal/repo"
 )
 
@@ -111,6 +112,16 @@ func initStore(ctx context.Context) (*store, error) {
 	if credentials, err = loadEnv(credsConf); err != nil {
 		return nil, err
 	}
+	log.Debug(ctx, map[string]any{"filename": credsConf.EnvFilename, "service_env": credsConf.ServiceEnv}, "env loaded")
+
+	defer func() {
+		log.Debug(ctx, map[string]any{
+			"got_user_store": userClient != nil,
+			"got_user_urls":  userURLs != nil,
+			"got_note_store": noteClient != nil,
+			"complete":       _TheStore != nil,
+		}, "initStore status")
+	}()
 
 	baseENClient = en.NewClient(
 		credentials.key,

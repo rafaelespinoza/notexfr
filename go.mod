@@ -1,6 +1,6 @@
 module github.com/rafaelespinoza/notexfr
 
-go 1.19
+go 1.21
 
 require (
 	github.com/dreampuf/evernote-sdk-golang v0.0.0-20200205091351-d2ad936dfa1c

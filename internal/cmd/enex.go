@@ -31,7 +31,6 @@ For more info on exporting Evernote data, see: %s`, helpLink),
 		toJSON.Flags().StringP("input", "i", "", "path to evernote export file")
 		toJSON.Flags().StringP("output", "o", "", "path to write data as JSON")
 		toJSON.Flags().DurationP("timeout", "t", 15*time.Second, "how long to wait before timing out")
-		toJSON.Flags().BoolP("verbose", "v", false, "output stuff as it happens")
 
 		toJSON.RunE = func(cmd *cobra.Command, args []string) (err error) {
 			f := cmd.Flags()
@@ -45,10 +44,6 @@ For more info on exporting Evernote data, see: %s`, helpLink),
 				return
 			}
 			params.Timeout, err = f.GetDuration("timeout")
-			if err != nil {
-				return
-			}
-			params.Verbose, err = f.GetBool("verbose")
 			if err != nil {
 				return
 			}

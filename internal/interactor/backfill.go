@@ -91,7 +91,7 @@ func BackfillSN(ctx context.Context, opts *BackfillParams) (out []entity.LinkID,
 	if err != nil {
 		return
 	}
-	if err = writeResources(notes, opts.OutputFilenames.Notes, true, "backfilled notes"); err != nil {
+	if err = writeResources(notes, opts.OutputFilenames.Notes, "backfilled notes"); err != nil {
 		return
 	}
 	out = notes
@@ -160,7 +160,7 @@ func initEvernoteItems(ctx context.Context, opts *BackfillParams) (out *serviceI
 	return
 }
 
-func initStandardNotesItems(ctx context.Context, opts *BackfillParams) (out *serviceItems, err error) {
+func initStandardNotesItems(_ context.Context, opts *BackfillParams) (out *serviceItems, err error) {
 	notes, tags, err := sn.ReadConversionFile(opts.StandardNotesFilename)
 	if err != nil {
 		return

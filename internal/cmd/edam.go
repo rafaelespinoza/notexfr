@@ -135,7 +135,6 @@ Specify account credentials with the -envfile flag.`, cmd.Name())
 	flags := cmd.Flags()
 	flags.StringP("output", "o", "", "path to write data as JSON")
 	flags.DurationP("timeout", "t", time.Duration(120)*time.Second, "how long to wait before timing out")
-	flags.BoolP("verbose", "v", false, "output stuff as it happens")
 	flags.BoolP("production", "p", false, "use production evernote account")
 	flags.StringP("envfile", "e", "", "path to to env var file")
 }

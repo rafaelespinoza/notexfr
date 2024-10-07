@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/rafaelespinoza/notexfr/internal/entity"
+	"github.com/rafaelespinoza/notexfr/internal/log"
 	"golang.org/x/net/html"
 
 	"github.com/dreampuf/evernote-sdk-golang/edam"
@@ -58,9 +59,7 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error
 
 	for !pagination.done {
 		var ierr error
-		if n.rqp.Verbose {
-			fmt.Printf("fetching metadata, running total: %d\n", len(out))
-		}
+		log.Info(ctx, map[string]any{"running_total": len(out)}, "fetching note metadata...")
 		notesMetadataList, ierr := s.FindNotesMetadata(
 			ctx,
 			s.token,
@@ -87,13 +86,14 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error
 		}
 
 		resultSpec := &edam.NoteResultSpec{IncludeContent: &yes}
-		if n.rqp.Verbose {
-			fmt.Printf("\tdone fetching metadata, results %d\n", len(notesMetadata))
-		}
+		log.Info(ctx, map[string]any{"num_results": len(notesMetadata)}, "done fetching metadata")
 		for i, noteMeta := range notesMetadata {
 			noteID := noteMeta.GetGUID()
-			if n.rqp.Verbose && numResultsInRange > 1 && i%(numResultsInRange/2) == 0 {
-				fmt.Printf("\tfetching note content %d/%d\n", len(out)+i, numTotalResults)
+			if numResultsInRange > 1 && i%(numResultsInRange/2) == 0 {
+				log.Info(ctx, map[string]any{
+					"curr_position":     len(out) + i,
+					"num_total_results": numTotalResults,
+				}, "fetching note content")
 			}
 			result, ierr := s.GetNoteWithResultSpec(
 				ctx,
@@ -117,9 +117,7 @@ func (n *Notes) FetchRemote(ctx context.Context) (out []entity.LinkID, err error
 			subList[i] = note
 		}
 		out = append(out, subList...)
-		if n.rqp.Verbose {
-			fmt.Printf("\tdone fetching contents, total so far: %d\n", len(out))
-		}
+		log.Info(ctx, map[string]any{"count": len(out)}, "fetched contents")
 	}
 	return
 }
@@ -131,7 +129,6 @@ type NotesRemoteQueryParams struct {
 	PageSize   int32
 	TagIDs     []string
 	NotebookID string
-	Verbose    bool
 }
 
 // toFilter converts the params note search options. The default order is by
