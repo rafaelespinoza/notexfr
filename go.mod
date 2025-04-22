@@ -8,7 +8,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/macrat/go-enex v0.0.0-20190325124011-11ac7b8c8c4c
 	github.com/spf13/cobra v1.8.1
-	golang.org/x/net v0.36.0
+	golang.org/x/net v0.39.0
 )
 
 require (
